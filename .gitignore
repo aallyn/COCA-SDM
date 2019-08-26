@@ -1,3 +1,10 @@
+# Folders
+Data/
+Doc/
+gsod_cache/
+Old/
+Results/
+
 # History files
 .Rhistory
 .Rapp.history
