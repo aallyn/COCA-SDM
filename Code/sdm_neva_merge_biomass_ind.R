@@ -190,8 +190,8 @@ temp.scale<- function(new.temp, base.temp.mean, base.temp.sd){
 # Fish assessment species
 fish.spp<- read.csv(here("Data", "Assesmentfishspecies.csv"))
 
-# Read it in, filter to one species, do some quick formatting to fit the GAM
-dat<- readRDS(here("Data", "model.dat.rds")) %>% 
+# Read it in, do some quick formatting to fit the GAM
+dat<- readRDS(here("Data", "model.dat.rds"))%>% 
   filter(., SVSPP %in% fish.spp$SVSPP) %>%
   left_join(., fish.spp, by = "SVSPP") 
 
@@ -355,28 +355,46 @@ base.preds<- base.preds.f %>%
 
 ## Future
 fut.preds.sp<- spring.preds %>%
-  dplyr::select(., x, y, Spring.2055.mu, Spring.2055.pct05, Spring.2055.pct95, DEPTH, SHELF_POS) %>%
+  dplyr::select(., x, y, Spring.2055.rcp85.mu, Spring.2055.rcp85.pct05, Spring.2055.rcp85.pct95, Spring.2100.rcp85.mu, Spring.2100.rcp85.pct05, Spring.2100.rcp85.pct95, Spring.2055.rcp45.mu, Spring.2055.rcp45.pct05, Spring.2055.rcp45.pct95, Spring.2100.rcp45.mu, Spring.2100.rcp45.pct05, Spring.2100.rcp45.pct95, DEPTH, SHELF_POS) %>%
   mutate(., "SEASON" = rep("SPRING", nrow(.))) %>%
   left_join(., spring.rescale.df, by = "SEASON")
 fut.preds.sp$DEPTH.Scale<- mapply(temp.scale, abs(fut.preds.sp$DEPTH), spring.rescale.df$mean.depth, spring.rescale.df$sd.depth)
 fut.preds.sp$SHELF_POS.Scale<- mapply(temp.scale, fut.preds.sp$SHELF_POS, spring.rescale.df$mean.shelf, spring.rescale.df$sd.shelf)
-fut.preds.sp$SEASONALMU.OISST.Scale<- mapply(temp.scale, fut.preds.sp$Spring.2055.mu, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
-fut.preds.sp$SEASONAL05.OISST.Scale<- mapply(temp.scale, fut.preds.sp$Spring.2055.pct05, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
-fut.preds.sp$SEASONAL95.OISST.Scale<- mapply(temp.scale, fut.preds.sp$Spring.2055.pct95, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
+fut.preds.sp$SEASONALMU.2055.RCP85.OISST.Scale<- mapply(temp.scale, fut.preds.sp$Spring.2055.rcp85.mu, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
+fut.preds.sp$SEASONAL05.2055.RCP85.OISST.Scale<- mapply(temp.scale, fut.preds.sp$Spring.2055.rcp85.pct05, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
+fut.preds.sp$SEASONAL95.2055.RCP85.OISST.Scale<- mapply(temp.scale, fut.preds.sp$Spring.2055.rcp85.pct95, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
+fut.preds.sp$SEASONALMU.2100.RCP85.OISST.Scale<- mapply(temp.scale, fut.preds.sp$Spring.2100.rcp85.mu, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
+fut.preds.sp$SEASONAL05.2100.RCP85.OISST.Scale<- mapply(temp.scale, fut.preds.sp$Spring.2100.rcp85.pct05, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
+fut.preds.sp$SEASONAL95.2100.RCP85.OISST.Scale<- mapply(temp.scale, fut.preds.sp$Spring.2100.rcp85.pct95, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
+fut.preds.sp$SEASONALMU.2055.RCP45.OISST.Scale<- mapply(temp.scale, fut.preds.sp$Spring.2055.rcp45.mu, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
+fut.preds.sp$SEASONAL05.2055.RCP45.OISST.Scale<- mapply(temp.scale, fut.preds.sp$Spring.2055.rcp45.pct05, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
+fut.preds.sp$SEASONAL95.2055.RCP45.OISST.Scale<- mapply(temp.scale, fut.preds.sp$Spring.2055.rcp45.pct95, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
+fut.preds.sp$SEASONALMU.2100.RCP45.OISST.Scale<- mapply(temp.scale, fut.preds.sp$Spring.2100.rcp45.mu, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
+fut.preds.sp$SEASONAL05.2100.RCP45.OISST.Scale<- mapply(temp.scale, fut.preds.sp$Spring.2100.rcp45.pct05, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
+fut.preds.sp$SEASONAL95.2100.RCP45.OISST.Scale<- mapply(temp.scale, fut.preds.sp$Spring.2100.rcp45.pct95, spring.rescale.df$mean.t, spring.rescale.df$sd.t)
 
 fut.preds.sp<- fut.preds.sp %>%
   group_by(., SEASON) %>%
   nest(.key = "Data")
 
 fut.preds.f<- fall.preds %>%
-  dplyr::select(., x, y, Fall.2055.mu, Fall.2055.pct05, Fall.2055.pct95, DEPTH, SHELF_POS) %>%
+  dplyr::select(., x, y, Fall.2055.rcp85.mu, Fall.2055.rcp85.pct05, Fall.2055.rcp85.pct95, Fall.2100.rcp85.mu, Fall.2100.rcp85.pct05, Fall.2100.rcp85.pct95, Fall.2055.rcp45.mu, Fall.2055.rcp45.pct05, Fall.2055.rcp45.pct95, Fall.2100.rcp45.mu, Fall.2100.rcp45.pct05, Fall.2100.rcp45.pct95, DEPTH, SHELF_POS) %>%
   mutate(., "SEASON" = rep("FALL", nrow(.))) %>%
   left_join(., fall.rescale.df, by = "SEASON")
 fut.preds.f$DEPTH.Scale<- mapply(temp.scale, abs(fut.preds.f$DEPTH), fall.rescale.df$mean.depth, fall.rescale.df$sd.depth)
 fut.preds.f$SHELF_POS.Scale<- mapply(temp.scale, fut.preds.f$SHELF_POS, fall.rescale.df$mean.shelf, fall.rescale.df$sd.shelf)
-fut.preds.f$SEASONALMU.OISST.Scale<- mapply(temp.scale, fut.preds.f$Fall.2055.mu, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
-fut.preds.f$SEASONAL05.OISST.Scale<- mapply(temp.scale, fut.preds.f$Fall.2055.pct05, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
-fut.preds.f$SEASONAL95.OISST.Scale<- mapply(temp.scale, fut.preds.f$Fall.2055.pct95, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
+fut.preds.f$SEASONALMU.2055.RCP85.OISST.Scale<- mapply(temp.scale, fut.preds.f$Fall.2055.rcp85.mu, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
+fut.preds.f$SEASONAL05.2055.RCP85.OISST.Scale<- mapply(temp.scale, fut.preds.f$Fall.2055.rcp85.pct05, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
+fut.preds.f$SEASONAL95.2055.RCP85.OISST.Scale<- mapply(temp.scale, fut.preds.f$Fall.2055.rcp85.pct95, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
+fut.preds.f$SEASONALMU.2100.RCP85.OISST.Scale<- mapply(temp.scale, fut.preds.f$Fall.2100.rcp85.mu, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
+fut.preds.f$SEASONAL05.2100.RCP85.OISST.Scale<- mapply(temp.scale, fut.preds.f$Fall.2100.rcp85.pct05, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
+fut.preds.f$SEASONAL95.2100.RCP85.OISST.Scale<- mapply(temp.scale, fut.preds.f$Fall.2100.rcp85.pct95, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
+fut.preds.f$SEASONALMU.2055.RCP45.OISST.Scale<- mapply(temp.scale, fut.preds.f$Fall.2055.rcp45.mu, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
+fut.preds.f$SEASONAL05.2055.RCP45.OISST.Scale<- mapply(temp.scale, fut.preds.f$Fall.2055.rcp45.pct05, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
+fut.preds.f$SEASONAL95.2055.RCP45.OISST.Scale<- mapply(temp.scale, fut.preds.f$Fall.2055.rcp45.pct95, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
+fut.preds.f$SEASONALMU.2100.RCP45.OISST.Scale<- mapply(temp.scale, fut.preds.f$Fall.2100.rcp45.mu, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
+fut.preds.f$SEASONAL05.2100.RCP45.OISST.Scale<- mapply(temp.scale, fut.preds.f$Fall.2100.rcp45.pct05, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
+fut.preds.f$SEASONAL95.2100.RCP45.OISST.Scale<- mapply(temp.scale, fut.preds.f$Fall.2100.rcp45.pct95, fall.rescale.df$mean.t, fall.rescale.df$sd.t)
 
 fut.preds.f<- fut.preds.f %>%
   group_by(., SEASON) %>%
@@ -387,25 +405,23 @@ fut.preds<- fut.preds.f %>%
 
 ## Also going to want these as prediction dataframes to plot GAM smooths
 # Prediction dataframe
-pred.dat.f<- with(fut.preds$Data[[1]],
+pred.dat.f<- with(base.preds$Data[[1]],
                   data.frame(SEASONALMU.OISST.Scale = c(seq(min(SEASONALMU.OISST.Scale, na.rm = T), max(SEASONALMU.OISST.Scale, na.rm = T), length = 500), rep(mean(SEASONALMU.OISST.Scale, na.rm = T), 1000)),
                              DEPTH.Scale = c(rep(mean(DEPTH.Scale, na.rm = T), 500), seq(min(DEPTH.Scale, na.rm = T), max(DEPTH.Scale, na.rm = T), length = 500), rep(mean(DEPTH.Scale, na.rm = T), 500)),
                              SHELF_POS.Scale = c(rep(mean(SHELF_POS.Scale, na.rm = T), 1000), seq(min(SHELF_POS.Scale, na.rm = T), max(SHELF_POS.Scale, na.rm = T), length = 500)), "SEASON" = rep("FALL", 1500)))
-rescaled.dat.f<- with(fut.preds$Data[[1]],
-                      data.frame("SST" = seq(min(Fall.2055.mu, na.rm = T), max(Fall.2055.mu, na.rm = T), length = 500),
-                                 "Depth" = seq(min(abs(DEPTH), na.rm = T), max(abs(DEPTH), na.rm = T), length = 500),
-                                 "Shelf_Pos" = seq(min(SHELF_POS, na.rm = T), max(SHELF_POS, na.rm = T), length = 500),
-                                 "Season" = rep("FALL", 500)))
+rescaled.dat.f<- data.frame("SST" = seq(min(dat.train.f$SEASONALMU.OISST, na.rm = T), max(dat.train.f$SEASONALMU.OISST, na.rm = T), length = 500),
+                                 "Depth" = seq(min(abs(dat.train.f$DEPTH), na.rm = T), max(abs(dat.train.f$DEPTH), na.rm = T), length = 500),
+                                 "Shelf_Pos" = seq(min(dat.train.f$SHELF_POS, na.rm = T), max(dat.train.f$SHELF_POS, na.rm = T), length = 500),
+                                 "Season" = rep("FALL", 500))
 
-pred.dat.s<- with(fut.preds$Data[[2]],
+pred.dat.s<- with(base.preds$Data[[2]],
                   data.frame(SEASONALMU.OISST.Scale = c(seq(min(SEASONALMU.OISST.Scale, na.rm = T), max(SEASONALMU.OISST.Scale, na.rm = T), length = 500), rep(mean(SEASONALMU.OISST.Scale, na.rm = T), 1000)),
                              DEPTH.Scale = c(rep(mean(DEPTH.Scale, na.rm = T), 500), seq(min(DEPTH.Scale, na.rm = T), max(DEPTH.Scale, na.rm = T), length = 500), rep(mean(DEPTH.Scale, na.rm = T), 500)),
                              SHELF_POS.Scale = c(rep(mean(SHELF_POS.Scale, na.rm = T), 1000), seq(min(SHELF_POS.Scale, na.rm = T), max(SHELF_POS.Scale, na.rm = T), length = 500)), "SEASON" = rep("SPRING", 1500)))
-rescaled.dat.s<- with(fut.preds$Data[[2]],
-                      data.frame("SST" = seq(min(Spring.2055.mu, na.rm = T), max(Spring.2055.mu, na.rm = T), length = 500),
-                                 "Depth" = seq(min(abs(DEPTH), na.rm = T), max(abs(DEPTH), na.rm = T), length = 500),
-                                 "Shelf_Pos" = seq(min(SHELF_POS, na.rm = T), max(SHELF_POS, na.rm = T), length = 500),
-                                 "Season" = rep("SPRING", 500)))
+rescaled.dat.s<- data.frame("SST" = seq(min(dat.train.s$SEASONALMU.OISST, na.rm = T), max(dat.train.s$SEASONALMU.OISST, na.rm = T), length = 500),
+                            "Depth" = seq(min(abs(dat.train.s$DEPTH), na.rm = T), max(abs(dat.train.s$DEPTH), na.rm = T), length = 500),
+                            "Shelf_Pos" = seq(min(dat.train.s$SHELF_POS, na.rm = T), max(dat.train.s$SHELF_POS, na.rm = T), length = 500),
+                            "Season" = rep("SPRING", 500))
 
 pred.dat<- bind_rows(pred.dat.f, pred.dat.s)
 rescaled.dat<- bind_rows(rescaled.dat.f, rescaled.dat.s)
@@ -1130,80 +1146,265 @@ for(i in seq_along(res.files)){
   
   # Mean climate model SST
   newdat.mu<- fut.preds$Data[[match(season, fut.preds$SEASON)]]
-  newdat.mu<- newdat.mu %>%
+  newdat.2055.rcp85.mu<- newdat.mu %>%
     unnest() %>%
-    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONALMU.OISST.Scale"))
-  sdm.fut.mu.p<- round(predict.gam(mod.fitted.p, newdata = newdat.mu, type = "response"), 2)
-  sdm.fut.mu.b<- round(as.numeric(sdm.fut.mu.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.mu, type = "response"))), 2)
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONALMU.2055.RCP85.OISST.Scale"))
+  names(newdat.2055.rcp85.mu)[4]<- "SEASONALMU.OISST.Scale"
+  sdm.2055.rcp85.mu.p<- round(predict.gam(mod.fitted.p, newdata = newdat.2055.rcp85.mu, type = "response"), 2)
+  sdm.2055.rcp85.mu.b<- round(as.numeric(sdm.2055.rcp85.mu.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.2055.rcp85.mu, type = "response"))), 2)
+  
+  newdat.2100.rcp85.mu<- newdat.mu %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONALMU.2100.RCP85.OISST.Scale"))
+  names(newdat.2100.rcp85.mu)[4]<- "SEASONALMU.OISST.Scale"
+  sdm.2100.rcp85.mu.p<- round(predict.gam(mod.fitted.p, newdata = newdat.2100.rcp85.mu, type = "response"), 2)
+  sdm.2100.rcp85.mu.b<- round(as.numeric(sdm.2100.rcp85.mu.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.2100.rcp85.mu, type = "response"))), 2)
+  
+  newdat.2055.rcp45.mu<- newdat.mu %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONALMU.2055.RCP45.OISST.Scale"))
+  names(newdat.2055.rcp45.mu)[4]<- "SEASONALMU.OISST.Scale"
+  sdm.2055.rcp45.mu.p<- round(predict.gam(mod.fitted.p, newdata = newdat.2055.rcp45.mu, type = "response"), 2)
+  sdm.2055.rcp45.mu.b<- round(as.numeric(sdm.2055.rcp85.mu.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.2055.rcp45.mu, type = "response"))), 2)
+  
+  newdat.2100.rcp45.mu<- newdat.mu %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONALMU.2100.RCP45.OISST.Scale"))
+  names(newdat.2100.rcp45.mu)[4]<- "SEASONALMU.OISST.Scale"
+  sdm.2100.rcp45.mu.p<- round(predict.gam(mod.fitted.p, newdata = newdat.2100.rcp45.mu, type = "response"), 2)
+  sdm.2100.rcp45.mu.b<- round(as.numeric(sdm.2100.rcp45.mu.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.2100.rcp45.mu, type = "response"))), 2)
   
   # pct05 climate model
   newdat.05<- fut.preds$Data[[match(season, fut.preds$SEASON)]] 
-  newdat.05<- newdat.05 %>%
+  newdat.2055.rcp85.05<- newdat.05 %>%
     unnest() %>%
-    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL05.OISST.Scale"))
-  names(newdat.05)[4]<- "SEASONALMU.OISST.Scale"
-  sdm.fut.pct05.p<- round(predict.gam(mod.fitted.p, newdata = newdat.05, type = "response"), 2)
-  sdm.fut.pct05.b<- round(as.numeric(sdm.fut.pct05.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.05, type = "response"))), 2)
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL05.2055.RCP85.OISST.Scale"))
+  names(newdat.2055.rcp85.05)[4]<- "SEASONALMU.OISST.Scale"
+  sdm.2055.rcp85.pct05.p<- round(predict.gam(mod.fitted.p, newdata = newdat.2055.rcp85.05, type = "response"), 2)
+  sdm.2055.rcp85.pct05.b<- round(as.numeric(sdm.2055.rcp85.pct05.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.2055.rcp85.05, type = "response"))), 2)
+  
+  newdat.2100.rcp85.05<- newdat.05 %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL05.2100.RCP85.OISST.Scale"))
+  names(newdat.2100.rcp85.05)[4]<- "SEASONALMU.OISST.Scale"
+  sdm.2100.rcp85.pct05.p<- round(predict.gam(mod.fitted.p, newdata = newdat.2100.rcp85.05, type = "response"), 2)
+  sdm.2100.rcp85.pct05.b<- round(as.numeric(sdm.2100.rcp85.pct05.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.2100.rcp85.05, type = "response"))), 2)
+  
+  newdat.2055.rcp45.05<- newdat.05 %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL05.2055.RCP45.OISST.Scale"))
+  names(newdat.2055.rcp45.05)[4]<- "SEASONALMU.OISST.Scale"
+  sdm.2055.rcp45.pct05.p<- round(predict.gam(mod.fitted.p, newdata = newdat.2055.rcp45.05, type = "response"), 2)
+  sdm.2055.rcp45.pct05.b<- round(as.numeric(sdm.2055.rcp45.pct05.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.2055.rcp45.05, type = "response"))), 2)
+  
+  newdat.2100.rcp45.05<- newdat.05 %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL05.2100.RCP45.OISST.Scale"))
+  names(newdat.2100.rcp45.05)[4]<- "SEASONALMU.OISST.Scale"
+  sdm.2100.rcp45.pct05.p<- round(predict.gam(mod.fitted.p, newdata = newdat.2100.rcp45.05, type = "response"), 2)
+  sdm.2100.rcp45.pct05.b<- round(as.numeric(sdm.2100.rcp45.pct05.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.2100.rcp45.05, type = "response"))), 2)
   
   # pct95 climate model
   newdat.95<- fut.preds$Data[[match(season, fut.preds$SEASON)]] 
-  newdat.95<- newdat.95 %>%
+  newdat.2055.rcp85.95<- newdat.95 %>%
     unnest() %>%
-    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL95.OISST.Scale"))
-  names(newdat.95)[4]<- "SEASONALMU.OISST.Scale"
-  sdm.fut.pct95.p<- round(predict.gam(mod.fitted.p, newdata = newdat.95, type = "response"), 2)
-  sdm.fut.pct95.b<- round(as.numeric(sdm.fut.pct95.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.95, type = "response"))), 2)
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL95.2055.RCP85.OISST.Scale"))
+  names(newdat.2055.rcp85.95)[4]<- "SEASONALMU.OISST.Scale"
+  sdm.2055.rcp85.pct95.p<- round(predict.gam(mod.fitted.p, newdata = newdat.2055.rcp85.95, type = "response"), 2)
+  sdm.2055.rcp85.pct95.b<- round(as.numeric(sdm.2055.rcp85.pct95.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.2055.rcp85.95, type = "response"))), 2)
+  
+  newdat.2100.rcp85.95<- newdat.95 %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL95.2100.RCP85.OISST.Scale"))
+  names(newdat.2100.rcp85.95)[4]<- "SEASONALMU.OISST.Scale"
+  sdm.2100.rcp85.pct95.p<- round(predict.gam(mod.fitted.p, newdata = newdat.2100.rcp85.95, type = "response"), 2)
+  sdm.2100.rcp85.pct95.b<- round(as.numeric(sdm.2100.rcp85.pct95.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.2100.rcp85.95, type = "response"))), 2)
+  
+  newdat.2055.rcp45.95<- newdat.95 %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL95.2055.RCP45.OISST.Scale"))
+  names(newdat.2055.rcp45.95)[4]<- "SEASONALMU.OISST.Scale"
+  sdm.2055.rcp45.pct95.p<- round(predict.gam(mod.fitted.p, newdata = newdat.2055.rcp45.95, type = "response"), 2)
+  sdm.2055.rcp45.pct95.b<- round(as.numeric(sdm.2055.rcp45.pct95.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.2055.rcp45.95, type = "response"))), 2)
+  
+  newdat.2100.rcp45.95<- newdat.95 %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL95.2100.RCP45.OISST.Scale"))
+  names(newdat.2100.rcp45.95)[4]<- "SEASONALMU.OISST.Scale"
+  sdm.2100.rcp45.pct95.p<- round(predict.gam(mod.fitted.p, newdata = newdat.2100.rcp45.95, type = "response"), 2)
+  sdm.2100.rcp45.pct95.b<- round(as.numeric(sdm.2100.rcp45.pct95.p) * exp(as.numeric(predict.gam(mod.fitted.b, newdata = newdat.2100.rcp45.95, type = "response"))), 2)
   
   # Presence only dataframes
   sdm.map.base.p<- data.frame("x" = base.preds$Data[[match(season, base.preds$SEASON)]]$x, "y" = base.preds$Data[[match(season, base.preds$SEASON)]]$y, "pred" = sdm.base.p)
-  sdm.map.fut.mu.p<- data.frame("x" = newdat.mu$x, "y" = newdat.mu$y, "pred" = sdm.fut.mu.p)
-  sdm.map.fut.pct05.p<- data.frame("x" = newdat.05$x, "y" = newdat.05$y, "pred.05" = sdm.fut.pct05.p)
-  sdm.map.fut.pct95.p<- data.frame("x" = newdat.95$x, "y" = newdat.95$y, "pred.95" = sdm.fut.pct95.p)
-  sdm.map.base.b<- data.frame("x" = base.preds$Data[[match(season, base.preds$SEASON)]]$x, "y" = base.preds$Data[[match(season, base.preds$SEASON)]]$y, "pred" = sdm.base.b)
-  sdm.map.fut.mu.b<- data.frame("x" = newdat.mu$x, "y" = newdat.mu$y, "pred" = sdm.fut.mu.b)
-  sdm.map.fut.pct05.b<- data.frame("x" = newdat.05$x, "y" = newdat.05$y, "pred.05" = sdm.fut.pct05.b)
-  sdm.map.fut.pct95.b<- data.frame("x" = newdat.95$x, "y" = newdat.95$y, "pred.95" = sdm.fut.pct95.b)
-  
-  # Differences
-  sdm.diff.p<- data.frame("x" = sdm.map.fut.mu.p$x, "y" = sdm.map.fut.mu.p$y, "pred" = sdm.map.fut.mu.p$pred - sdm.map.base.p$pred)
-  sdm.lwr.diff.p<- data.frame("x" = sdm.map.fut.pct05.p$x, "y" = sdm.map.fut.pct05.p$y, "pred" = sdm.map.fut.pct05.p$pred - sdm.map.base.p$pred)
-  sdm.upr.diff.p<- data.frame("x" = sdm.map.fut.pct95.p$x, "y" = sdm.map.fut.pct95.p$y, "pred" = sdm.map.fut.pct95.p$pred - sdm.map.base.p$pred)
-  
-  # Percent Differences
-  sdm.percdiff.p<- data.frame("x" = sdm.map.fut.mu.p$x, "y" = sdm.map.fut.mu.p$y, "pred" = 100*((sdm.map.fut.mu.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
-  sdm.lwr.percdiff.p<- data.frame("x" = sdm.map.fut.pct05.p$x, "y" = sdm.map.fut.pct05.p$y, "pred" = 100*((sdm.map.fut.pct05.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
-  sdm.upr.percdiff.p<- data.frame("x" = sdm.map.fut.pct95.p$x, "y" = sdm.map.fut.pct95.p$y, "pred" = 100*((sdm.map.fut.pct95.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
-  
-  names(sdm.map.base.p)[3]<- "Baseline.sdm.p"
-  names(sdm.map.fut.mu.p)[3]<- "Future_mean.sdm.p"
-  names(sdm.map.fut.pct05.p)[3]<- "Future_cold.sdm.p"
-  names(sdm.map.fut.pct95.p)[3]<- "Future_warm.sdm.p"
-  names(sdm.diff.p)[3]<- "Future_mean_diff.sdm.p"
-  names(sdm.lwr.diff.p)[3]<- "Future_cold_diff.sdm.p"
-  names(sdm.upr.diff.p)[3]<- "Future_warm_diff.sdm.p"
-  names(sdm.percdiff.p)[3]<- "Future_mean_percdiff.sdm.p"
-  names(sdm.lwr.percdiff.p)[3]<- "Future_cold_percdiff.sdm.p"
-  names(sdm.upr.percdiff.p)[3]<- "Future_warm_percdiff.sdm.p"
+  sdm.map.2055.rcp85.mu.p<- data.frame("x" = newdat.2055.rcp85.mu$x, "y" = newdat.2055.rcp85.mu$y, "pred" = sdm.2055.rcp85.mu.p)
+  sdm.map.2055.rcp85.pct05.p<- data.frame("x" = newdat.2055.rcp85.05$x, "y" = newdat.2055.rcp85.05$y, "pred.05" = sdm.2055.rcp85.pct05.p)
+  sdm.map.2055.rcp85.pct95.p<- data.frame("x" = newdat.2055.rcp85.95$x, "y" = newdat.2055.rcp85.95$y, "pred.95" = sdm.2055.rcp85.pct95.p)
+  sdm.map.2100.rcp85.mu.p<- data.frame("x" = newdat.2100.rcp85.mu$x, "y" = newdat.2100.rcp85.mu$y, "pred" = sdm.2100.rcp85.mu.p)
+  sdm.map.2100.rcp85.pct05.p<- data.frame("x" = newdat.2100.rcp85.05$x, "y" = newdat.2100.rcp85.05$y, "pred.05" = sdm.2100.rcp85.pct05.p)
+  sdm.map.2100.rcp85.pct95.p<- data.frame("x" = newdat.2100.rcp85.95$x, "y" = newdat.2100.rcp85.95$y, "pred.95" = sdm.2100.rcp85.pct95.p)
+  sdm.map.2055.rcp45.mu.p<- data.frame("x" = newdat.2055.rcp45.mu$x, "y" = newdat.2055.rcp45.mu$y, "pred" = sdm.2055.rcp45.mu.p)
+  sdm.map.2055.rcp45.pct05.p<- data.frame("x" = newdat.2055.rcp45.05$x, "y" = newdat.2055.rcp45.05$y, "pred.05" = sdm.2055.rcp45.pct05.p)
+  sdm.map.2055.rcp45.pct95.p<- data.frame("x" = newdat.2055.rcp45.95$x, "y" = newdat.2055.rcp45.95$y, "pred.95" = sdm.2055.rcp45.pct95.p)
+  sdm.map.2100.rcp45.mu.p<- data.frame("x" = newdat.2100.rcp45.mu$x, "y" = newdat.2100.rcp45.mu$y, "pred" = sdm.2100.rcp45.mu.p)
+  sdm.map.2100.rcp45.pct05.p<- data.frame("x" = newdat.2100.rcp45.05$x, "y" = newdat.2100.rcp45.05$y, "pred.05" = sdm.2100.rcp45.pct05.p)
+  sdm.map.2100.rcp45.pct95.p<- data.frame("x" = newdat.2100.rcp45.95$x, "y" = newdat.2100.rcp45.95$y, "pred.95" = sdm.2100.rcp45.pct95.p)
   
   # Biomass
-  sdm.diff.b<- data.frame("x" = sdm.map.fut.mu.b$x, "y" = sdm.map.fut.mu.b$y, "pred" = sdm.map.fut.mu.b$pred - sdm.map.base.b$pred)
-  sdm.lwr.diff.b<- data.frame("x" = sdm.map.fut.pct05.b$x, "y" = sdm.map.fut.pct05.b$y, "pred" = sdm.map.fut.pct05.b$pred - sdm.map.base.b$pred)
-  sdm.upr.diff.b<- data.frame("x" = sdm.map.fut.pct95.b$x, "y" = sdm.map.fut.pct95.b$y, "pred" = sdm.map.fut.pct95.b$pred - sdm.map.base.b$pred)
+  sdm.map.base.b<- data.frame("x" = base.preds$Data[[match(season, base.preds$SEASON)]]$x, "y" = base.preds$Data[[match(season, base.preds$SEASON)]]$y, "pred" = sdm.base.b)
+  sdm.map.2055.rcp85.mu.b<- data.frame("x" = newdat.2055.rcp85.mu$x, "y" = newdat.2055.rcp85.mu$y, "pred" = sdm.2055.rcp85.mu.b)
+  sdm.map.2055.rcp85.pct05.b<- data.frame("x" = newdat.2055.rcp85.05$x, "y" = newdat.2055.rcp85.05$y, "pred.05" = sdm.2055.rcp85.pct05.b)
+  sdm.map.2055.rcp85.pct95.b<- data.frame("x" = newdat.2055.rcp85.95$x, "y" = newdat.2055.rcp85.95$y, "pred.95" = sdm.2055.rcp85.pct95.b)
+  sdm.map.2100.rcp85.mu.b<- data.frame("x" = newdat.2100.rcp85.mu$x, "y" = newdat.2100.rcp85.mu$y, "pred" = sdm.2100.rcp85.mu.b)
+  sdm.map.2100.rcp85.pct05.b<- data.frame("x" = newdat.2100.rcp85.05$x, "y" = newdat.2100.rcp85.05$y, "pred.05" = sdm.2100.rcp85.pct05.b)
+  sdm.map.2100.rcp85.pct95.b<- data.frame("x" = newdat.2100.rcp85.95$x, "y" = newdat.2100.rcp85.95$y, "pred.95" = sdm.2100.rcp85.pct95.b)
+  sdm.map.2055.rcp45.mu.b<- data.frame("x" = newdat.2055.rcp45.mu$x, "y" = newdat.2055.rcp45.mu$y, "pred" = sdm.2055.rcp45.mu.b)
+  sdm.map.2055.rcp45.pct05.b<- data.frame("x" = newdat.2055.rcp45.05$x, "y" = newdat.2055.rcp45.05$y, "pred.05" = sdm.2055.rcp45.pct05.b)
+  sdm.map.2055.rcp45.pct95.b<- data.frame("x" = newdat.2055.rcp45.95$x, "y" = newdat.2055.rcp45.95$y, "pred.95" = sdm.2055.rcp45.pct95.b)
+  sdm.map.2100.rcp45.mu.b<- data.frame("x" = newdat.2100.rcp45.mu$x, "y" = newdat.2100.rcp45.mu$y, "pred" = sdm.2100.rcp45.mu.b)
+  sdm.map.2100.rcp45.pct05.b<- data.frame("x" = newdat.2100.rcp45.05$x, "y" = newdat.2100.rcp45.05$y, "pred.05" = sdm.2100.rcp45.pct05.b)
+  sdm.map.2100.rcp45.pct95.b<- data.frame("x" = newdat.2100.rcp45.95$x, "y" = newdat.2100.rcp45.95$y, "pred.95" = sdm.2100.rcp45.pct95.b)
   
-  sdm.percdiff.b<- data.frame("x" = sdm.map.fut.mu.b$x, "y" = sdm.map.fut.mu.b$y, "pred" = 100*((sdm.map.fut.mu.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
-  sdm.lwr.percdiff.b<- data.frame("x" = sdm.map.fut.pct05.b$x, "y" = sdm.map.fut.pct05.b$y, "pred" = 100*((sdm.map.fut.pct05.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
-  sdm.upr.percdiff.b<- data.frame("x" = sdm.map.fut.pct95.b$x, "y" = sdm.map.fut.pct95.b$y, "pred" = 100*((sdm.map.fut.pct95.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
+  # Differences
+  sdm.diff.2055.rcp85.p<- data.frame("x" = sdm.map.2055.rcp85.mu.p$x, "y" = sdm.map.2055.rcp85.mu.p$y, "pred" = sdm.map.2055.rcp85.mu.p$pred - sdm.map.base.p$pred)
+  sdm.lwr.diff.2055.rcp85.p<- data.frame("x" = sdm.map.2055.rcp85.pct05.p$x, "y" = sdm.map.2055.rcp85.pct05.p$y, "pred" = sdm.map.2055.rcp85.pct05.p$pred - sdm.map.base.p$pred)
+  sdm.upr.diff.2055.rcp85.p<- data.frame("x" = sdm.map.2055.rcp85.pct95.p$x, "y" = sdm.map.2055.rcp85.pct95.p$y, "pred" = sdm.map.2055.rcp85.pct95.p$pred - sdm.map.base.p$pred)
+  sdm.diff.2100.rcp85.p<- data.frame("x" = sdm.map.2100.rcp85.mu.p$x, "y" = sdm.map.2100.rcp85.mu.p$y, "pred" = sdm.map.2100.rcp85.mu.p$pred - sdm.map.base.p$pred)
+  sdm.lwr.diff.2100.rcp85.p<- data.frame("x" = sdm.map.2100.rcp85.pct05.p$x, "y" = sdm.map.2100.rcp85.pct05.p$y, "pred" = sdm.map.2100.rcp85.pct05.p$pred - sdm.map.base.p$pred)
+  sdm.upr.diff.2100.rcp85.p<- data.frame("x" = sdm.map.2100.rcp85.pct95.p$x, "y" = sdm.map.2100.rcp85.pct95.p$y, "pred" = sdm.map.2100.rcp85.pct95.p$pred - sdm.map.base.p$pred)
+  
+  sdm.diff.2055.rcp45.p<- data.frame("x" = sdm.map.2055.rcp45.mu.p$x, "y" = sdm.map.2055.rcp45.mu.p$y, "pred" = sdm.map.2055.rcp45.mu.p$pred - sdm.map.base.p$pred)
+  sdm.lwr.diff.2055.rcp45.p<- data.frame("x" = sdm.map.2055.rcp45.pct05.p$x, "y" = sdm.map.2055.rcp45.pct05.p$y, "pred" = sdm.map.2055.rcp45.pct05.p$pred - sdm.map.base.p$pred)
+  sdm.upr.diff.2055.rcp45.p<- data.frame("x" = sdm.map.2055.rcp45.pct95.p$x, "y" = sdm.map.2055.rcp45.pct95.p$y, "pred" = sdm.map.2055.rcp45.pct95.p$pred - sdm.map.base.p$pred)
+  sdm.diff.2100.rcp45.p<- data.frame("x" = sdm.map.2100.rcp45.mu.p$x, "y" = sdm.map.2100.rcp45.mu.p$y, "pred" = sdm.map.2100.rcp45.mu.p$pred - sdm.map.base.p$pred)
+  sdm.lwr.diff.2100.rcp45.p<- data.frame("x" = sdm.map.2100.rcp45.pct05.p$x, "y" = sdm.map.2100.rcp45.pct05.p$y, "pred" = sdm.map.2100.rcp45.pct05.p$pred - sdm.map.base.p$pred)
+  sdm.upr.diff.2100.rcp45.p<- data.frame("x" = sdm.map.2100.rcp45.pct95.p$x, "y" = sdm.map.2100.rcp45.pct95.p$y, "pred" = sdm.map.2100.rcp45.pct95.p$pred - sdm.map.base.p$pred)
+  
+  # Percent Differences
+  sdm.percdiff.2055.rcp85.p<- data.frame("x" = sdm.map.2055.rcp85.mu.p$x, "y" = sdm.map.2055.rcp85.mu.p$y, "pred" = 100*((sdm.map.2055.rcp85.mu.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
+  sdm.lwr.percdiff.2055.rcp85.p<- data.frame("x" = sdm.map.2055.rcp85.pct05.p$x, "y" = sdm.map.2055.rcp85.pct05.p$y, "pred" = 100*((sdm.map.2055.rcp85.pct05.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
+  sdm.upr.percdiff.2055.rcp85.p<- data.frame("x" = sdm.map.2055.rcp85.pct95.p$x, "y" = sdm.map.2055.rcp85.pct95.p$y, "pred" = 100*((sdm.map.2055.rcp85.pct95.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
+  sdm.percdiff.2100.rcp85.p<- data.frame("x" = sdm.map.2100.rcp85.mu.p$x, "y" = sdm.map.2100.rcp85.mu.p$y, "pred" = 100*((sdm.map.2100.rcp85.mu.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
+  sdm.lwr.percdiff.2100.rcp85.p<- data.frame("x" = sdm.map.2100.rcp85.pct05.p$x, "y" = sdm.map.2100.rcp85.pct05.p$y, "pred" = 100*((sdm.map.2100.rcp85.pct05.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
+  sdm.upr.percdiff.2100.rcp85.p<- data.frame("x" = sdm.map.2100.rcp85.pct95.p$x, "y" = sdm.map.2100.rcp85.pct95.p$y, "pred" = 100*((sdm.map.2100.rcp85.pct95.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
+  
+  sdm.percdiff.2055.rcp45.p<- data.frame("x" = sdm.map.2055.rcp45.mu.p$x, "y" = sdm.map.2055.rcp45.mu.p$y, "pred" = 100*((sdm.map.2055.rcp45.mu.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
+  sdm.lwr.percdiff.2055.rcp45.p<- data.frame("x" = sdm.map.2055.rcp45.pct05.p$x, "y" = sdm.map.2055.rcp45.pct05.p$y, "pred" = 100*((sdm.map.2055.rcp45.pct05.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
+  sdm.upr.percdiff.2055.rcp45.p<- data.frame("x" = sdm.map.2055.rcp45.pct95.p$x, "y" = sdm.map.2055.rcp45.pct95.p$y, "pred" = 100*((sdm.map.2055.rcp45.pct95.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
+  sdm.percdiff.2100.rcp45.p<- data.frame("x" = sdm.map.2100.rcp45.mu.p$x, "y" = sdm.map.2100.rcp45.mu.p$y, "pred" = 100*((sdm.map.2100.rcp45.mu.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
+  sdm.lwr.percdiff.2100.rcp45.p<- data.frame("x" = sdm.map.2100.rcp45.pct05.p$x, "y" = sdm.map.2100.rcp45.pct05.p$y, "pred" = 100*((sdm.map.2100.rcp45.pct05.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
+  sdm.upr.percdiff.2100.rcp45.p<- data.frame("x" = sdm.map.2100.rcp45.pct95.p$x, "y" = sdm.map.2100.rcp45.pct95.p$y, "pred" = 100*((sdm.map.2100.rcp45.pct95.p$pred - sdm.map.base.p$pred)/sdm.map.base.p$pred))
+  
+  names(sdm.map.base.p)[3]<- "Baseline.sdm.p"
+  names(sdm.map.2055.rcp85.mu.p)[3]<- "Future_2055_rcp85_mean.sdm.p"
+  names(sdm.map.2055.rcp85.pct05.p)[3]<- "Future_2055_rcp85_cold.sdm.p"
+  names(sdm.map.2055.rcp85.pct95.p)[3]<- "Future_2055_rcp85_warm.sdm.p"
+  names(sdm.diff.2055.rcp85.p)[3]<- "Future_2055_rcp85_mean_diff.sdm.p"
+  names(sdm.lwr.diff.2055.rcp85.p)[3]<- "Future_2055_rcp85_cold_diff.sdm.p"
+  names(sdm.upr.diff.2055.rcp85.p)[3]<- "Future_2055_rcp85_warm_diff.sdm.p"
+  names(sdm.percdiff.2055.rcp85.p)[3]<- "Future_2055_rcp85_mean_percdiff.sdm.p"
+  names(sdm.lwr.percdiff.2055.rcp85.p)[3]<- "Future_2055_rcp85_cold_percdiff.sdm.p"
+  names(sdm.upr.percdiff.2055.rcp85.p)[3]<- "Future_2055_rcp85_warm_percdiff.sdm.p"
+  
+  names(sdm.map.2100.rcp85.mu.p)[3]<- "Future_2100_rcp85_mean.sdm.p"
+  names(sdm.map.2100.rcp85.pct05.p)[3]<- "Future_2100_rcp85_cold.sdm.p"
+  names(sdm.map.2100.rcp85.pct95.p)[3]<- "Future_2100_rcp85_warm.sdm.p"
+  names(sdm.diff.2100.rcp85.p)[3]<- "Future_2100_rcp85_mean_diff.sdm.p"
+  names(sdm.lwr.diff.2100.rcp85.p)[3]<- "Future_2100_rcp85_cold_diff.sdm.p"
+  names(sdm.upr.diff.2100.rcp85.p)[3]<- "Future_2100_rcp85_warm_diff.sdm.p"
+  names(sdm.percdiff.2100.rcp85.p)[3]<- "Future_2100_rcp85_mean_percdiff.sdm.p"
+  names(sdm.lwr.percdiff.2100.rcp85.p)[3]<- "Future_2100_rcp85_cold_percdiff.sdm.p"
+  names(sdm.upr.percdiff.2100.rcp85.p)[3]<- "Future_2100_rcp85_warm_percdiff.sdm.p"
+  
+  names(sdm.map.2055.rcp45.mu.p)[3]<- "Future_2055_rcp45_mean.sdm.p"
+  names(sdm.map.2055.rcp45.pct05.p)[3]<- "Future_2055_rcp45_cold.sdm.p"
+  names(sdm.map.2055.rcp45.pct95.p)[3]<- "Future_2055_rcp45_warm.sdm.p"
+  names(sdm.diff.2055.rcp45.p)[3]<- "Future_2055_rcp45_mean_diff.sdm.p"
+  names(sdm.lwr.diff.2055.rcp45.p)[3]<- "Future_2055_rcp45_cold_diff.sdm.p"
+  names(sdm.upr.diff.2055.rcp45.p)[3]<- "Future_2055_rcp45_warm_diff.sdm.p"
+  names(sdm.percdiff.2055.rcp45.p)[3]<- "Future_2055_rcp45_mean_percdiff.sdm.p"
+  names(sdm.lwr.percdiff.2055.rcp45.p)[3]<- "Future_2055_rcp45_cold_percdiff.sdm.p"
+  names(sdm.upr.percdiff.2055.rcp45.p)[3]<- "Future_2055_rcp45_warm_percdiff.sdm.p"
+  
+  names(sdm.map.2100.rcp45.mu.p)[3]<- "Future_2100_rcp45_mean.sdm.p"
+  names(sdm.map.2100.rcp45.pct05.p)[3]<- "Future_2100_rcp45_cold.sdm.p"
+  names(sdm.map.2100.rcp45.pct95.p)[3]<- "Future_2100_rcp45_warm.sdm.p"
+  names(sdm.diff.2100.rcp45.p)[3]<- "Future_2100_rcp45_mean_diff.sdm.p"
+  names(sdm.lwr.diff.2100.rcp45.p)[3]<- "Future_2100_rcp45_cold_diff.sdm.p"
+  names(sdm.upr.diff.2100.rcp45.p)[3]<- "Future_2100_rcp45_warm_diff.sdm.p"
+  names(sdm.percdiff.2100.rcp45.p)[3]<- "Future_2100_rcp45_mean_percdiff.sdm.p"
+  names(sdm.lwr.percdiff.2100.rcp45.p)[3]<- "Future_2100_rcp45_cold_percdiff.sdm.p"
+  names(sdm.upr.percdiff.2100.rcp45.p)[3]<- "Future_2100_rcp45_warm_percdiff.sdm.p"
+  
+  # Biomass
+  sdm.diff.2055.rcp85.b<- data.frame("x" = sdm.map.2055.rcp85.mu.b$x, "y" = sdm.map.2055.rcp85.mu.b$y, "pred" = sdm.map.2055.rcp85.mu.b$pred - sdm.map.base.b$pred)
+  sdm.lwr.diff.2055.rcp85.b<- data.frame("x" = sdm.map.2055.rcp85.pct05.b$x, "y" = sdm.map.2055.rcp85.pct05.b$y, "pred" = sdm.map.2055.rcp85.pct05.b$pred - sdm.map.base.b$pred)
+  sdm.upr.diff.2055.rcp85.b<- data.frame("x" = sdm.map.2055.rcp85.pct95.b$x, "y" = sdm.map.2055.rcp85.pct95.b$y, "pred" = sdm.map.2055.rcp85.pct95.b$pred - sdm.map.base.b$pred)
+  sdm.diff.2100.rcp85.b<- data.frame("x" = sdm.map.2100.rcp85.mu.b$x, "y" = sdm.map.2100.rcp85.mu.b$y, "pred" = sdm.map.2100.rcp85.mu.b$pred - sdm.map.base.b$pred)
+  sdm.lwr.diff.2100.rcp85.b<- data.frame("x" = sdm.map.2100.rcp85.pct05.b$x, "y" = sdm.map.2100.rcp85.pct05.b$y, "pred" = sdm.map.2100.rcp85.pct05.b$pred - sdm.map.base.b$pred)
+  sdm.upr.diff.2100.rcp85.b<- data.frame("x" = sdm.map.2100.rcp85.pct95.b$x, "y" = sdm.map.2100.rcp85.pct95.b$y, "pred" = sdm.map.2100.rcp85.pct95.b$pred - sdm.map.base.b$pred)
+  
+  sdm.diff.2055.rcp45.b<- data.frame("x" = sdm.map.2055.rcp45.mu.b$x, "y" = sdm.map.2055.rcp45.mu.b$y, "pred" = sdm.map.2055.rcp45.mu.b$pred - sdm.map.base.b$pred)
+  sdm.lwr.diff.2055.rcp45.b<- data.frame("x" = sdm.map.2055.rcp45.pct05.b$x, "y" = sdm.map.2055.rcp45.pct05.b$y, "pred" = sdm.map.2055.rcp45.pct05.b$pred - sdm.map.base.b$pred)
+  sdm.upr.diff.2055.rcp45.b<- data.frame("x" = sdm.map.2055.rcp45.pct95.b$x, "y" = sdm.map.2055.rcp45.pct95.b$y, "pred" = sdm.map.2055.rcp45.pct95.b$pred - sdm.map.base.b$pred)
+  sdm.diff.2100.rcp45.b<- data.frame("x" = sdm.map.2100.rcp45.mu.b$x, "y" = sdm.map.2100.rcp45.mu.b$y, "pred" = sdm.map.2100.rcp45.mu.b$pred - sdm.map.base.b$pred)
+  sdm.lwr.diff.2100.rcp45.b<- data.frame("x" = sdm.map.2100.rcp45.pct05.b$x, "y" = sdm.map.2100.rcp45.pct05.b$y, "pred" = sdm.map.2100.rcp45.pct05.b$pred - sdm.map.base.b$pred)
+  sdm.upr.diff.2100.rcp45.b<- data.frame("x" = sdm.map.2100.rcp45.pct95.b$x, "y" = sdm.map.2100.rcp45.pct95.b$y, "pred" = sdm.map.2100.rcp45.pct95.b$pred - sdm.map.base.b$pred)
+  
+  # Percent Differences
+  sdm.percdiff.2055.rcp85.b<- data.frame("x" = sdm.map.2055.rcp85.mu.b$x, "y" = sdm.map.2055.rcp85.mu.b$y, "pred" = 100*((sdm.map.2055.rcp85.mu.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
+  sdm.lwr.percdiff.2055.rcp85.b<- data.frame("x" = sdm.map.2055.rcp85.pct05.b$x, "y" = sdm.map.2055.rcp85.pct05.b$y, "pred" = 100*((sdm.map.2055.rcp85.pct05.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
+  sdm.upr.percdiff.2055.rcp85.b<- data.frame("x" = sdm.map.2055.rcp85.pct95.b$x, "y" = sdm.map.2055.rcp85.pct95.b$y, "pred" = 100*((sdm.map.2055.rcp85.pct95.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
+  sdm.percdiff.2100.rcp85.b<- data.frame("x" = sdm.map.2100.rcp85.mu.b$x, "y" = sdm.map.2100.rcp85.mu.b$y, "pred" = 100*((sdm.map.2100.rcp85.mu.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
+  sdm.lwr.percdiff.2100.rcp85.b<- data.frame("x" = sdm.map.2100.rcp85.pct05.b$x, "y" = sdm.map.2100.rcp85.pct05.b$y, "pred" = 100*((sdm.map.2100.rcp85.pct05.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
+  sdm.upr.percdiff.2100.rcp85.b<- data.frame("x" = sdm.map.2100.rcp85.pct95.b$x, "y" = sdm.map.2100.rcp85.pct95.b$y, "pred" = 100*((sdm.map.2100.rcp85.pct95.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
+  
+  sdm.percdiff.2055.rcp45.b<- data.frame("x" = sdm.map.2055.rcp45.mu.b$x, "y" = sdm.map.2055.rcp45.mu.b$y, "pred" = 100*((sdm.map.2055.rcp45.mu.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
+  sdm.lwr.percdiff.2055.rcp45.b<- data.frame("x" = sdm.map.2055.rcp45.pct05.b$x, "y" = sdm.map.2055.rcp45.pct05.b$y, "pred" = 100*((sdm.map.2055.rcp45.pct05.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
+  sdm.upr.percdiff.2055.rcp45.b<- data.frame("x" = sdm.map.2055.rcp45.pct95.b$x, "y" = sdm.map.2055.rcp45.pct95.b$y, "pred" = 100*((sdm.map.2055.rcp45.pct95.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
+  sdm.percdiff.2100.rcp45.b<- data.frame("x" = sdm.map.2100.rcp45.mu.b$x, "y" = sdm.map.2100.rcp45.mu.b$y, "pred" = 100*((sdm.map.2100.rcp45.mu.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
+  sdm.lwr.percdiff.2100.rcp45.b<- data.frame("x" = sdm.map.2100.rcp45.pct05.b$x, "y" = sdm.map.2100.rcp45.pct05.b$y, "pred" = 100*((sdm.map.2100.rcp45.pct05.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
+  sdm.upr.percdiff.2100.rcp45.b<- data.frame("x" = sdm.map.2100.rcp45.pct95.b$x, "y" = sdm.map.2100.rcp45.pct95.b$y, "pred" = 100*((sdm.map.2100.rcp45.pct95.b$pred - sdm.map.base.b$pred)/sdm.map.base.b$pred))
   
   names(sdm.map.base.b)[3]<- "Baseline.sdm.b"
-  names(sdm.map.fut.mu.b)[3]<- "Future_mean.sdm.b"
-  names(sdm.map.fut.pct05.b)[3]<- "Future_cold.sdm.b"
-  names(sdm.map.fut.pct95.b)[3]<- "Future_warm.sdm.b"
-  names(sdm.diff.b)[3]<- "Future_mean_diff.sdm.b"
-  names(sdm.lwr.diff.b)[3]<- "Future_cold_diff.sdm.b"
-  names(sdm.upr.diff.b)[3]<- "Future_warm_diff.sdm.b"
-  names(sdm.percdiff.b)[3]<- "Future_mean_percdiff.sdm.b"
-  names(sdm.lwr.percdiff.b)[3]<- "Future_cold_percdiff.sdm.b"
-  names(sdm.upr.percdiff.b)[3]<- "Future_warm_percdiff.sdm.b"
+  names(sdm.map.2055.rcp85.mu.b)[3]<- "Future_2055_rcp85_mean.sdm.b"
+  names(sdm.map.2055.rcp85.pct05.b)[3]<- "Future_2055_rcp85_cold.sdm.b"
+  names(sdm.map.2055.rcp85.pct95.b)[3]<- "Future_2055_rcp85_warm.sdm.b"
+  names(sdm.diff.2055.rcp85.b)[3]<- "Future_2055_rcp85_mean_diff.sdm.b"
+  names(sdm.lwr.diff.2055.rcp85.b)[3]<- "Future_2055_rcp85_cold_diff.sdm.b"
+  names(sdm.upr.diff.2055.rcp85.b)[3]<- "Future_2055_rcp85_warm_diff.sdm.b"
+  names(sdm.percdiff.2055.rcp85.b)[3]<- "Future_2055_rcp85_mean_percdiff.sdm.b"
+  names(sdm.lwr.percdiff.2055.rcp85.b)[3]<- "Future_2055_rcp85_cold_percdiff.sdm.b"
+  names(sdm.upr.percdiff.2055.rcp85.b)[3]<- "Future_2055_rcp85_warm_percdiff.sdm.b"
+  
+  names(sdm.map.2100.rcp85.mu.b)[3]<- "Future_2100_rcp85_mean.sdm.b"
+  names(sdm.map.2100.rcp85.pct05.b)[3]<- "Future_2100_rcp85_cold.sdm.b"
+  names(sdm.map.2100.rcp85.pct95.b)[3]<- "Future_2100_rcp85_warm.sdm.b"
+  names(sdm.diff.2100.rcp85.b)[3]<- "Future_2100_rcp85_mean_diff.sdm.b"
+  names(sdm.lwr.diff.2100.rcp85.b)[3]<- "Future_2100_rcp85_cold_diff.sdm.b"
+  names(sdm.upr.diff.2100.rcp85.b)[3]<- "Future_2100_rcp85_warm_diff.sdm.b"
+  names(sdm.percdiff.2100.rcp85.b)[3]<- "Future_2100_rcp85_mean_percdiff.sdm.b"
+  names(sdm.lwr.percdiff.2100.rcp85.b)[3]<- "Future_2100_rcp85_cold_percdiff.sdm.b"
+  names(sdm.upr.percdiff.2100.rcp85.b)[3]<- "Future_2100_rcp85_warm_percdiff.sdm.b"
+  
+  names(sdm.map.2055.rcp45.mu.b)[3]<- "Future_2055_rcp45_mean.sdm.b"
+  names(sdm.map.2055.rcp45.pct05.b)[3]<- "Future_2055_rcp45_cold.sdm.b"
+  names(sdm.map.2055.rcp45.pct95.b)[3]<- "Future_2055_rcp45_warm.sdm.b"
+  names(sdm.diff.2055.rcp45.b)[3]<- "Future_2055_rcp45_mean_diff.sdm.b"
+  names(sdm.lwr.diff.2055.rcp45.b)[3]<- "Future_2055_rcp45_cold_diff.sdm.b"
+  names(sdm.upr.diff.2055.rcp45.b)[3]<- "Future_2055_rcp45_warm_diff.sdm.b"
+  names(sdm.percdiff.2055.rcp45.b)[3]<- "Future_2055_rcp45_mean_percdiff.sdm.b"
+  names(sdm.lwr.percdiff.2055.rcp45.b)[3]<- "Future_2055_rcp45_cold_percdiff.sdm.b"
+  names(sdm.upr.percdiff.2055.rcp45.b)[3]<- "Future_2055_rcp45_warm_percdiff.sdm.b"
+  
+  names(sdm.map.2100.rcp45.mu.b)[3]<- "Future_2100_rcp45_mean.sdm.b"
+  names(sdm.map.2100.rcp45.pct05.b)[3]<- "Future_2100_rcp45_cold.sdm.b"
+  names(sdm.map.2100.rcp45.pct95.b)[3]<- "Future_2100_rcp45_warm.sdm.b"
+  names(sdm.diff.2100.rcp45.b)[3]<- "Future_2100_rcp45_mean_diff.sdm.b"
+  names(sdm.lwr.diff.2100.rcp45.b)[3]<- "Future_2100_rcp45_cold_diff.sdm.b"
+  names(sdm.upr.diff.2100.rcp45.b)[3]<- "Future_2100_rcp45_warm_diff.sdm.b"
+  names(sdm.percdiff.2100.rcp45.b)[3]<- "Future_2100_rcp45_mean_percdiff.sdm.b"
+  names(sdm.lwr.percdiff.2100.rcp45.b)[3]<- "Future_2100_rcp45_cold_percdiff.sdm.b"
+  names(sdm.upr.percdiff.2100.rcp45.b)[3]<- "Future_2100_rcp45_warm_percdiff.sdm.b"
   
   # Getting combined biomass predictions
   # Make predictions with these values
@@ -1212,81 +1413,280 @@ for(i in seq_along(res.files)){
   
   # Mean climate model SST
   newdat.mu<- fut.preds$Data[[match(season, fut.preds$SEASON)]]
-  newdat.mu<- newdat.mu %>%
+  newdat.2055.rcp85.mu<- newdat.mu %>%
     unnest() %>%
-    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONALMU.OISST.Scale"))
-  lpmat.fut.mu<- predict.gam(mod.fitted.b, newdata = newdat.mu, type = "lpmatrix")
-  combo.map.fut.mu<- data.frame("x" = newdat.mu$x, "y" = newdat.mu$y, "pred" = round(sdm.fut.mu.p * exp(ilink(as.numeric(lpmat.fut.mu %*% t(best.fit.mat)))), 2))
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONALMU.2055.RCP85.OISST.Scale"))
+  names(newdat.2055.rcp85.mu)[4]<- "SEASONALMU.OISST.Scale"
+  lpmat.2055.rcp85.mu<- predict.gam(mod.fitted.b, newdata = newdat.2055.rcp85.mu, type = "lpmatrix")
+  combo.map.2055.rcp85.mu<- data.frame("x" = newdat.2055.rcp85.mu$x, "y" = newdat.2055.rcp85.mu$y, "pred" = round(sdm.2055.rcp85.mu.p * exp(ilink(as.numeric(lpmat.2055.rcp85.mu %*% t(best.fit.mat)))), 2))
+  
+  newdat.2100.rcp85.mu<- newdat.mu %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONALMU.2100.RCP85.OISST.Scale"))
+  names(newdat.2100.rcp85.mu)[4]<- "SEASONALMU.OISST.Scale"
+  lpmat.2100.rcp85.mu<- predict.gam(mod.fitted.b, newdata = newdat.2100.rcp85.mu, type = "lpmatrix")
+  combo.map.2100.rcp85.mu<- data.frame("x" = newdat.2100.rcp85.mu$x, "y" = newdat.2100.rcp85.mu$y, "pred" = round(sdm.2100.rcp85.mu.p * exp(ilink(as.numeric(lpmat.2100.rcp85.mu %*% t(best.fit.mat)))), 2))
+  
+  newdat.2055.rcp45.mu<- newdat.mu %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONALMU.2055.RCP45.OISST.Scale"))
+  names(newdat.2055.rcp45.mu)[4]<- "SEASONALMU.OISST.Scale"
+  lpmat.2055.rcp45.mu<- predict.gam(mod.fitted.b, newdata = newdat.2055.rcp45.mu, type = "lpmatrix")
+  combo.map.2055.rcp45.mu<- data.frame("x" = newdat.2055.rcp45.mu$x, "y" = newdat.2055.rcp45.mu$y, "pred" = round(sdm.2055.rcp45.mu.p * exp(ilink(as.numeric(lpmat.2055.rcp45.mu %*% t(best.fit.mat)))), 2))
+  
+  newdat.2100.rcp45.mu<- newdat.mu %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONALMU.2100.RCP45.OISST.Scale"))
+  names(newdat.2100.rcp45.mu)[4]<- "SEASONALMU.OISST.Scale"
+  lpmat.2100.rcp45.mu<- predict.gam(mod.fitted.b, newdata = newdat.2100.rcp45.mu, type = "lpmatrix")
+  combo.map.2100.rcp45.mu<- data.frame("x" = newdat.2100.rcp45.mu$x, "y" = newdat.2100.rcp45.mu$y, "pred" = round(sdm.2100.rcp45.mu.p * exp(ilink(as.numeric(lpmat.2100.rcp45.mu %*% t(best.fit.mat)))), 2))
   
   # pct05 climate model
   newdat.05<- fut.preds$Data[[match(season, fut.preds$SEASON)]] 
-  newdat.05<- newdat.05 %>%
+  newdat.2055.rcp85.05<- newdat.05 %>%
     unnest() %>%
-    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL05.OISST.Scale"))
-  names(newdat.05)[4]<- "SEASONALMU.OISST.Scale"
-  lpmat.fut.pct05<- predict.gam(mod.fitted.b, newdata = newdat.05, type = "lpmatrix")
-  combo.map.fut.pct05<- data.frame("x" = newdat.05$x, "y" = newdat.05$y, "pred.05" = round(sdm.fut.pct05.p * exp(ilink(as.numeric(lpmat.fut.pct05 %*% t(best.fit.mat)))), 2))
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL05.2055.RCP85.OISST.Scale"))
+  names(newdat.2055.rcp85.05)[4]<- "SEASONALMU.OISST.Scale"
+  lpmat.2055.rcp85.pct05<- predict.gam(mod.fitted.b, newdata = newdat.2055.rcp85.05, type = "lpmatrix")
+  combo.map.2055.rcp85.pct05<- data.frame("x" = newdat.2055.rcp85.05$x, "y" = newdat.2055.rcp85.05$y, "pred.05" = round(sdm.2055.rcp85.pct05.p * exp(ilink(as.numeric(lpmat.2055.rcp85.pct05 %*% t(best.fit.mat)))), 2))
+  
+  newdat.2100.rcp85.05<- newdat.05 %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL05.2100.RCP85.OISST.Scale"))
+  names(newdat.2100.rcp85.05)[4]<- "SEASONALMU.OISST.Scale"
+  lpmat.2100.rcp85.pct05<- predict.gam(mod.fitted.b, newdata = newdat.2100.rcp85.05, type = "lpmatrix")
+  combo.map.2100.rcp85.pct05<- data.frame("x" = newdat.2100.rcp85.05$x, "y" = newdat.2100.rcp85.05$y, "pred.05" = round(sdm.2100.rcp85.pct05.p * exp(ilink(as.numeric(lpmat.2100.rcp85.pct05 %*% t(best.fit.mat)))), 2))
+  
+  newdat.2055.rcp45.05<- newdat.05 %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL05.2055.RCP45.OISST.Scale"))
+  names(newdat.2055.rcp45.05)[4]<- "SEASONALMU.OISST.Scale"
+  lpmat.2055.rcp45.pct05<- predict.gam(mod.fitted.b, newdata = newdat.2055.rcp45.05, type = "lpmatrix")
+  combo.map.2055.rcp45.pct05<- data.frame("x" = newdat.2055.rcp45.05$x, "y" = newdat.2055.rcp45.05$y, "pred.05" = round(sdm.2055.rcp45.pct05.p * exp(ilink(as.numeric(lpmat.2055.rcp45.pct05 %*% t(best.fit.mat)))), 2))
+  
+  newdat.2100.rcp45.05<- newdat.05 %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL05.2100.RCP45.OISST.Scale"))
+  names(newdat.2100.rcp45.05)[4]<- "SEASONALMU.OISST.Scale"
+  lpmat.2100.rcp45.pct05<- predict.gam(mod.fitted.b, newdata = newdat.2100.rcp45.05, type = "lpmatrix")
+  combo.map.2100.rcp45.pct05<- data.frame("x" = newdat.2100.rcp45.05$x, "y" = newdat.2100.rcp45.05$y, "pred.05" = round(sdm.2100.rcp45.pct05.p * exp(ilink(as.numeric(lpmat.2100.rcp45.pct05 %*% t(best.fit.mat)))), 2))
   
   # pct95 climate model
   newdat.95<- fut.preds$Data[[match(season, fut.preds$SEASON)]] 
-  newdat.95<- newdat.95 %>%
+  newdat.2055.rcp85.95<- newdat.95 %>%
     unnest() %>%
-    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL95.OISST.Scale"))
-  names(newdat.95)[4]<- "SEASONALMU.OISST.Scale"
-  lpmat.fut.pct95<- predict.gam(mod.fitted.b, newdata = newdat.95, type = "lpmatrix")
-  combo.map.fut.pct95<- data.frame("x" = newdat.95$x, "y" = newdat.95$y, "pred.95" = round(sdm.fut.pct95.p * exp(ilink(as.numeric(lpmat.fut.pct95 %*% t(best.fit.mat)))), 2))
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL95.2055.RCP85.OISST.Scale"))
+  names(newdat.2055.rcp85.95)[4]<- "SEASONALMU.OISST.Scale"
+  lpmat.2055.rcp85.pct95<- predict.gam(mod.fitted.b, newdata = newdat.2055.rcp85.95, type = "lpmatrix")
+  combo.map.2055.rcp85.pct95<- data.frame("x" = newdat.2055.rcp85.95$x, "y" = newdat.2055.rcp85.95$y, "pred.95" = round(sdm.2055.rcp85.pct95.p * exp(ilink(as.numeric(lpmat.2055.rcp85.pct95 %*% t(best.fit.mat)))), 2))
+  
+  newdat.2100.rcp85.95<- newdat.95 %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL95.2100.RCP85.OISST.Scale"))
+  names(newdat.2100.rcp85.95)[4]<- "SEASONALMU.OISST.Scale"
+  lpmat.2100.rcp85.pct95<- predict.gam(mod.fitted.b, newdata = newdat.2100.rcp85.95, type = "lpmatrix")
+  combo.map.2100.rcp85.pct95<- data.frame("x" = newdat.2100.rcp85.95$x, "y" = newdat.2100.rcp85.95$y, "pred.95" = round(sdm.2100.rcp85.pct95.p * exp(ilink(as.numeric(lpmat.2100.rcp85.pct95 %*% t(best.fit.mat)))), 2))
+  
+  newdat.2055.rcp45.95<- newdat.95 %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL95.2055.RCP45.OISST.Scale"))
+  names(newdat.2055.rcp45.95)[4]<- "SEASONALMU.OISST.Scale"
+  lpmat.2055.rcp45.pct95<- predict.gam(mod.fitted.b, newdata = newdat.2055.rcp45.95, type = "lpmatrix")
+  combo.map.2055.rcp45.pct95<- data.frame("x" = newdat.2055.rcp45.95$x, "y" = newdat.2055.rcp45.95$y, "pred.95" = round(sdm.2055.rcp45.pct95.p * exp(ilink(as.numeric(lpmat.2055.rcp45.pct95 %*% t(best.fit.mat)))), 2))
+  
+  newdat.2100.rcp45.95<- newdat.95 %>%
+    unnest() %>%
+    dplyr::select(., c("x", "y", "DEPTH.Scale", "SEASONAL95.2100.RCP45.OISST.Scale"))
+  names(newdat.2100.rcp45.95)[4]<- "SEASONALMU.OISST.Scale"
+  lpmat.2100.rcp45.pct95<- predict.gam(mod.fitted.b, newdata = newdat.2100.rcp45.95, type = "lpmatrix")
+  combo.map.2100.rcp45.pct95<- data.frame("x" = newdat.2100.rcp45.95$x, "y" = newdat.2100.rcp45.95$y, "pred.95" = round(sdm.2100.rcp45.pct95.p * exp(ilink(as.numeric(lpmat.2100.rcp45.pct95 %*% t(best.fit.mat)))), 2))
   
   # Differences
-  combo.diff<- data.frame("x" = combo.map.fut.mu$x, "y" = combo.map.fut.mu$y, "pred" = combo.map.fut.mu$pred - combo.map.base$pred)
-  combo.lwr.diff<- data.frame("x" = combo.map.fut.pct05$x, "y" = combo.map.fut.pct05$y, "pred" = combo.map.fut.pct05$pred - combo.map.base$pred)
-  combo.upr.diff<- data.frame("x" = combo.map.fut.pct95$x, "y" = combo.map.fut.pct95$y, "pred" = combo.map.fut.pct95$pred - combo.map.base$pred)
+  combo.diff.2055.rcp85<- data.frame("x" = combo.map.2055.rcp85.mu$x, "y" = combo.map.2055.rcp85.mu$y, "pred" = combo.map.2055.rcp85.mu$pred - combo.map.base$pred)
+  combo.lwr.diff.2055.rcp85<- data.frame("x" = combo.map.2055.rcp85.pct05$x, "y" = combo.map.2055.rcp85.pct05$y, "pred" = combo.map.2055.rcp85.pct05$pred - combo.map.base$pred)
+  combo.upr.diff.2055.rcp85<- data.frame("x" = combo.map.2055.rcp85.pct95$x, "y" = combo.map.2055.rcp85.pct95$y, "pred" = combo.map.2055.rcp85.pct95$pred - combo.map.base$pred)
   
-  combo.percdiff<- data.frame("x" = combo.map.fut.mu$x, "y" = combo.map.fut.mu$y, "pred" = 100*((combo.map.fut.mu$pred - combo.map.base$pred)/combo.map.base$pred))
-  combo.lwr.percdiff<- data.frame("x" = combo.map.fut.pct05$x, "y" = combo.map.fut.pct05$y, "pred" = 100*((combo.map.fut.pct05$pred - combo.map.base$pred)/combo.map.base$pred))
-  combo.upr.percdiff<- data.frame("x" = combo.map.fut.pct95$x, "y" = combo.map.fut.pct95$y, "pred" = 100*((combo.map.fut.pct95$pred - combo.map.base$pred)/combo.map.base$pred))
+  combo.percdiff.2055.rcp85<- data.frame("x" = combo.map.2055.rcp85.mu$x, "y" = combo.map.2055.rcp85.mu$y, "pred" = 100*((combo.map.2055.rcp85.mu$pred - combo.map.base$pred)/combo.map.base$pred))
+  combo.lwr.percdiff.2055.rcp85<- data.frame("x" = combo.map.2055.rcp85.pct05$x, "y" = combo.map.2055.rcp85.pct05$y, "pred" = 100*((combo.map.2055.rcp85.pct05$pred - combo.map.base$pred)/combo.map.base$pred))
+  combo.upr.percdiff.2055.rcp85<- data.frame("x" = combo.map.2055.rcp85.pct95$x, "y" = combo.map.2055.rcp85.pct95$y, "pred" = 100*((combo.map.2055.rcp85.pct95$pred - combo.map.base$pred)/combo.map.base$pred))
+  
+  combo.diff.2100.rcp85<- data.frame("x" = combo.map.2100.rcp85.mu$x, "y" = combo.map.2100.rcp85.mu$y, "pred" = combo.map.2100.rcp85.mu$pred - combo.map.base$pred)
+  combo.lwr.diff.2100.rcp85<- data.frame("x" = combo.map.2100.rcp85.pct05$x, "y" = combo.map.2100.rcp85.pct05$y, "pred" = combo.map.2100.rcp85.pct05$pred - combo.map.base$pred)
+  combo.upr.diff.2100.rcp85<- data.frame("x" = combo.map.2100.rcp85.pct95$x, "y" = combo.map.2100.rcp85.pct95$y, "pred" = combo.map.2100.rcp85.pct95$pred - combo.map.base$pred)
+  
+  combo.percdiff.2100.rcp85<- data.frame("x" = combo.map.2100.rcp85.mu$x, "y" = combo.map.2100.rcp85.mu$y, "pred" = 100*((combo.map.2100.rcp85.mu$pred - combo.map.base$pred)/combo.map.base$pred))
+  combo.lwr.percdiff.2100.rcp85<- data.frame("x" = combo.map.2100.rcp85.pct05$x, "y" = combo.map.2100.rcp85.pct05$y, "pred" = 100*((combo.map.2100.rcp85.pct05$pred - combo.map.base$pred)/combo.map.base$pred))
+  combo.upr.percdiff.2100.rcp85<- data.frame("x" = combo.map.2100.rcp85.pct95$x, "y" = combo.map.2100.rcp85.pct95$y, "pred" = 100*((combo.map.2100.rcp85.pct95$pred - combo.map.base$pred)/combo.map.base$pred))
+  
+  combo.diff.2055.rcp45<- data.frame("x" = combo.map.2055.rcp45.mu$x, "y" = combo.map.2055.rcp45.mu$y, "pred" = combo.map.2055.rcp45.mu$pred - combo.map.base$pred)
+  combo.lwr.diff.2055.rcp45<- data.frame("x" = combo.map.2055.rcp45.pct05$x, "y" = combo.map.2055.rcp45.pct05$y, "pred" = combo.map.2055.rcp45.pct05$pred - combo.map.base$pred)
+  combo.upr.diff.2055.rcp45<- data.frame("x" = combo.map.2055.rcp45.pct95$x, "y" = combo.map.2055.rcp45.pct95$y, "pred" = combo.map.2055.rcp45.pct95$pred - combo.map.base$pred)
+  
+  combo.percdiff.2055.rcp45<- data.frame("x" = combo.map.2055.rcp45.mu$x, "y" = combo.map.2055.rcp45.mu$y, "pred" = 100*((combo.map.2055.rcp45.mu$pred - combo.map.base$pred)/combo.map.base$pred))
+  combo.lwr.percdiff.2055.rcp45<- data.frame("x" = combo.map.2055.rcp45.pct05$x, "y" = combo.map.2055.rcp45.pct05$y, "pred" = 100*((combo.map.2055.rcp45.pct05$pred - combo.map.base$pred)/combo.map.base$pred))
+  combo.upr.percdiff.2055.rcp45<- data.frame("x" = combo.map.2055.rcp45.pct95$x, "y" = combo.map.2055.rcp45.pct95$y, "pred" = 100*((combo.map.2055.rcp45.pct95$pred - combo.map.base$pred)/combo.map.base$pred))
+  
+  combo.diff.2100.rcp45<- data.frame("x" = combo.map.2100.rcp45.mu$x, "y" = combo.map.2100.rcp45.mu$y, "pred" = combo.map.2100.rcp45.mu$pred - combo.map.base$pred)
+  combo.lwr.diff.2100.rcp45<- data.frame("x" = combo.map.2100.rcp45.pct05$x, "y" = combo.map.2100.rcp45.pct05$y, "pred" = combo.map.2100.rcp45.pct05$pred - combo.map.base$pred)
+  combo.upr.diff.2100.rcp45<- data.frame("x" = combo.map.2100.rcp45.pct95$x, "y" = combo.map.2100.rcp45.pct95$y, "pred" = combo.map.2100.rcp45.pct95$pred - combo.map.base$pred)
+  
+  combo.percdiff.2100.rcp45<- data.frame("x" = combo.map.2100.rcp45.mu$x, "y" = combo.map.2100.rcp45.mu$y, "pred" = 100*((combo.map.2100.rcp45.mu$pred - combo.map.base$pred)/combo.map.base$pred))
+  combo.lwr.percdiff.2100.rcp45<- data.frame("x" = combo.map.2100.rcp45.pct05$x, "y" = combo.map.2100.rcp45.pct05$y, "pred" = 100*((combo.map.2100.rcp45.pct05$pred - combo.map.base$pred)/combo.map.base$pred))
+  combo.upr.percdiff.2100.rcp45<- data.frame("x" = combo.map.2100.rcp45.pct95$x, "y" = combo.map.2100.rcp45.pct95$y, "pred" = 100*((combo.map.2100.rcp45.pct95$pred - combo.map.base$pred)/combo.map.base$pred))
   
   # Calculate fish availability for the different datasets: combo.map.base, combo.map.fut.mu, combo.map.fut.pct05, combo.map.fut.pct95, combo.diff, combo.lwr.diff, combo.upr.diff
   names(combo.map.base)[3]<- "Baseline.combo.b"
-  names(combo.map.fut.mu)[3]<- "Future_mean.combo.b"
-  names(combo.map.fut.pct05)[3]<- "Future_cold.combo.b"
-  names(combo.map.fut.pct95)[3]<- "Future_warm.combo.b"
-  names(combo.diff)[3]<- "Future_mean_diff.combo.b"
-  names(combo.lwr.diff)[3]<- "Future_cold_diff.combo.b"
-  names(combo.upr.diff)[3]<- "Future_warm_diff.combo.b"
-  names(combo.percdiff)[3]<- "Future_mean_percdiff.combo.b"
-  names(combo.lwr.percdiff)[3]<- "Future_cold_percdiff.combo.b"
-  names(combo.upr.percdiff)[3]<- "Future_warm_percdiff.combo.b"
+  names(combo.map.2055.rcp85.mu)[3]<- "Future_2055_rcp85_mean.combo.b"
+  names(combo.map.2055.rcp85.pct05)[3]<- "Future_2055_rcp85_cold.combo.b"
+  names(combo.map.2055.rcp85.pct95)[3]<- "Future_2055_rcp85_warm.combo.b"
+  names(combo.diff.2055.rcp85)[3]<- "Future_mean_2055_rcp85_diff.combo.b"
+  names(combo.lwr.diff.2055.rcp85)[3]<- "Future_cold_2055_rcp85_diff.combo.b"
+  names(combo.upr.diff.2055.rcp85)[3]<- "Future_warm_2055_rcp85_diff.combo.b"
+  names(combo.percdiff.2055.rcp85)[3]<- "Future_mean_2055_rcp85_percdiff.combo.b"
+  names(combo.lwr.percdiff.2055.rcp85)[3]<- "Future_cold_2055_rcp85_percdiff.combo.b"
+  names(combo.upr.percdiff.2055.rcp85)[3]<- "Future_warm_2055_rcp85_percdiff.combo.b"
+  
+  names(combo.map.2100.rcp85.mu)[3]<- "Future_2100_rcp85_mean.combo.b"
+  names(combo.map.2100.rcp85.pct05)[3]<- "Future_2100_rcp85_cold.combo.b"
+  names(combo.map.2100.rcp85.pct95)[3]<- "Future_2100_rcp85_warm.combo.b"
+  names(combo.diff.2100.rcp85)[3]<- "Future_mean_2100_rcp85_diff.combo.b"
+  names(combo.lwr.diff.2100.rcp85)[3]<- "Future_cold_2100_rcp85_diff.combo.b"
+  names(combo.upr.diff.2100.rcp85)[3]<- "Future_warm_2100_rcp85_diff.combo.b"
+  names(combo.percdiff.2100.rcp85)[3]<- "Future_mean_2100_rcp85_percdiff.combo.b"
+  names(combo.lwr.percdiff.2100.rcp85)[3]<- "Future_cold_2100_rcp85_percdiff.combo.b"
+  names(combo.upr.percdiff.2100.rcp85)[3]<- "Future_warm_2100_rcp85_percdiff.combo.b"
+  
+  names(combo.map.2055.rcp45.mu)[3]<- "Future_2055_rcp45_mean.combo.b"
+  names(combo.map.2055.rcp45.pct05)[3]<- "Future_2055_rcp45_cold.combo.b"
+  names(combo.map.2055.rcp45.pct95)[3]<- "Future_2055_rcp45_warm.combo.b"
+  names(combo.diff.2055.rcp45)[3]<- "Future_mean_2055_rcp45_diff.combo.b"
+  names(combo.lwr.diff.2055.rcp45)[3]<- "Future_cold_2055_rcp45_diff.combo.b"
+  names(combo.upr.diff.2055.rcp45)[3]<- "Future_warm_2055_rcp45_diff.combo.b"
+  names(combo.percdiff.2055.rcp45)[3]<- "Future_mean_2055_rcp45_percdiff.combo.b"
+  names(combo.lwr.percdiff.2055.rcp45)[3]<- "Future_cold_2055_rcp45_percdiff.combo.b"
+  names(combo.upr.percdiff.2055.rcp45)[3]<- "Future_warm_2055_rcp45_percdiff.combo.b"
+  
+  names(combo.map.2100.rcp45.mu)[3]<- "Future_2100_rcp45_mean.combo.b"
+  names(combo.map.2100.rcp45.pct05)[3]<- "Future_2100_rcp45_cold.combo.b"
+  names(combo.map.2100.rcp45.pct95)[3]<- "Future_2100_rcp45_warm.combo.b"
+  names(combo.diff.2100.rcp45)[3]<- "Future_mean_2100_rcp45_diff.combo.b"
+  names(combo.lwr.diff.2100.rcp45)[3]<- "Future_cold_2100_rcp45_diff.combo.b"
+  names(combo.upr.diff.2100.rcp45)[3]<- "Future_warm_2100_rcp45_diff.combo.b"
+  names(combo.percdiff.2100.rcp45)[3]<- "Future_mean_2100_rcp45_percdiff.combo.b"
+  names(combo.lwr.percdiff.2100.rcp45)[3]<- "Future_cold_2100_rcp45_percdiff.combo.b"
+  names(combo.upr.percdiff.2100.rcp45)[3]<- "Future_warm_2100_rcp45_percdiff.combo.b"
   
   projections.dat<- sdm.map.base.p %>%
-    left_join(., sdm.map.fut.mu.p, by = c("x", "y")) %>%
-    left_join(., sdm.map.fut.pct05.p, by = c("x", "y")) %>%
-    left_join(., sdm.map.fut.pct95.p, by = c("x", "y")) %>%
-    left_join(., sdm.diff.p, by = c("x", "y")) %>%
-    left_join(., sdm.lwr.diff.p, by = c("x", "y")) %>%
-    left_join(., sdm.upr.diff.p, by = c("x", "y")) %>%
-    left_join(., sdm.percdiff.p, by = c("x", "y")) %>%
-    left_join(., sdm.lwr.percdiff.p, by = c("x", "y")) %>%
-    left_join(., sdm.upr.percdiff.p, by = c("x", "y")) %>%
+    left_join(., sdm.map.2055.rcp85.mu.p, by = c("x", "y")) %>%
+    left_join(., sdm.map.2055.rcp85.pct05.p, by = c("x", "y")) %>%
+    left_join(., sdm.map.2055.rcp85.pct95.p, by = c("x", "y")) %>%
+    left_join(., sdm.map.2100.rcp85.mu.p, by = c("x", "y")) %>%
+    left_join(., sdm.map.2100.rcp85.pct05.p, by = c("x", "y")) %>%
+    left_join(., sdm.map.2100.rcp85.pct95.p, by = c("x", "y")) %>%
+    left_join(., sdm.map.2055.rcp45.mu.p, by = c("x", "y")) %>%
+    left_join(., sdm.map.2055.rcp45.pct05.p, by = c("x", "y")) %>%
+    left_join(., sdm.map.2055.rcp45.pct95.p, by = c("x", "y")) %>%
+    left_join(., sdm.map.2100.rcp45.mu.p, by = c("x", "y")) %>%
+    left_join(., sdm.map.2100.rcp45.pct05.p, by = c("x", "y")) %>%
+    left_join(., sdm.map.2100.rcp45.pct95.p, by = c("x", "y")) %>%
+    left_join(., sdm.diff.2055.rcp85.p, by = c("x", "y")) %>%
+    left_join(., sdm.lwr.diff.2055.rcp85.p, by = c("x", "y")) %>%
+    left_join(., sdm.upr.diff.2055.rcp85.p, by = c("x", "y")) %>%
+    left_join(., sdm.diff.2100.rcp85.p, by = c("x", "y")) %>%
+    left_join(., sdm.lwr.diff.2100.rcp85.p, by = c("x", "y")) %>%
+    left_join(., sdm.upr.diff.2100.rcp85.p, by = c("x", "y")) %>%
+    left_join(., sdm.diff.2055.rcp45.p, by = c("x", "y")) %>%
+    left_join(., sdm.lwr.diff.2055.rcp45.p, by = c("x", "y")) %>%
+    left_join(., sdm.upr.diff.2055.rcp45.p, by = c("x", "y")) %>%
+    left_join(., sdm.diff.2100.rcp45.p, by = c("x", "y")) %>%
+    left_join(., sdm.lwr.diff.2100.rcp45.p, by = c("x", "y")) %>%
+    left_join(., sdm.upr.diff.2100.rcp45.p, by = c("x", "y")) %>%
+    left_join(., sdm.percdiff.2055.rcp85.p, by = c("x", "y")) %>%
+    left_join(., sdm.lwr.percdiff.2055.rcp85.p, by = c("x", "y")) %>%
+    left_join(., sdm.upr.percdiff.2055.rcp85.p, by = c("x", "y")) %>%
+    left_join(., sdm.percdiff.2100.rcp85.p, by = c("x", "y")) %>%
+    left_join(., sdm.lwr.percdiff.2100.rcp85.p, by = c("x", "y")) %>%
+    left_join(., sdm.upr.percdiff.2100.rcp85.p, by = c("x", "y")) %>%
+    left_join(., sdm.percdiff.2055.rcp45.p, by = c("x", "y")) %>%
+    left_join(., sdm.lwr.percdiff.2055.rcp45.p, by = c("x", "y")) %>%
+    left_join(., sdm.upr.percdiff.2055.rcp45.p, by = c("x", "y")) %>%
+    left_join(., sdm.percdiff.2100.rcp45.p, by = c("x", "y")) %>%
+    left_join(., sdm.lwr.percdiff.2100.rcp45.p, by = c("x", "y")) %>%
+    left_join(., sdm.upr.percdiff.2100.rcp45.p, by = c("x", "y")) %>%
     left_join(., sdm.map.base.b, by = c("x", "y")) %>%
-    left_join(., sdm.map.fut.mu.b, by = c("x", "y")) %>%
-    left_join(., sdm.map.fut.pct05.b, by = c("x", "y")) %>%
-    left_join(., sdm.map.fut.pct95.b, by = c("x", "y")) %>%
-    left_join(., sdm.diff.b, by = c("x", "y")) %>%
-    left_join(., sdm.lwr.diff.b, by = c("x", "y")) %>%
-    left_join(., sdm.upr.diff.b, by = c("x", "y")) %>%
-    left_join(., sdm.percdiff.b, by = c("x", "y")) %>%
-    left_join(., sdm.lwr.percdiff.b, by = c("x", "y")) %>%
-    left_join(., sdm.upr.percdiff.b, by = c("x", "y")) %>%
+    left_join(., sdm.map.2055.rcp85.mu.b, by = c("x", "y")) %>%
+    left_join(., sdm.map.2055.rcp85.pct05.b, by = c("x", "y")) %>%
+    left_join(., sdm.map.2055.rcp85.pct95.b, by = c("x", "y")) %>%
+    left_join(., sdm.map.2100.rcp85.mu.b, by = c("x", "y")) %>%
+    left_join(., sdm.map.2100.rcp85.pct05.b, by = c("x", "y")) %>%
+    left_join(., sdm.map.2100.rcp85.pct95.b, by = c("x", "y")) %>%
+    left_join(., sdm.map.2055.rcp45.mu.b, by = c("x", "y")) %>%
+    left_join(., sdm.map.2055.rcp45.pct05.b, by = c("x", "y")) %>%
+    left_join(., sdm.map.2055.rcp45.pct95.b, by = c("x", "y")) %>%
+    left_join(., sdm.map.2100.rcp45.mu.b, by = c("x", "y")) %>%
+    left_join(., sdm.map.2100.rcp45.pct05.b, by = c("x", "y")) %>%
+    left_join(., sdm.map.2100.rcp45.pct95.b, by = c("x", "y")) %>%
+    left_join(., sdm.diff.2055.rcp85.b, by = c("x", "y")) %>%
+    left_join(., sdm.lwr.diff.2055.rcp85.b, by = c("x", "y")) %>%
+    left_join(., sdm.upr.diff.2055.rcp85.b, by = c("x", "y")) %>%
+    left_join(., sdm.diff.2100.rcp85.b, by = c("x", "y")) %>%
+    left_join(., sdm.lwr.diff.2100.rcp85.b, by = c("x", "y")) %>%
+    left_join(., sdm.upr.diff.2100.rcp85.b, by = c("x", "y")) %>%
+    left_join(., sdm.diff.2055.rcp45.b, by = c("x", "y")) %>%
+    left_join(., sdm.lwr.diff.2055.rcp45.b, by = c("x", "y")) %>%
+    left_join(., sdm.upr.diff.2055.rcp45.b, by = c("x", "y")) %>%
+    left_join(., sdm.diff.2100.rcp45.b, by = c("x", "y")) %>%
+    left_join(., sdm.lwr.diff.2100.rcp45.b, by = c("x", "y")) %>%
+    left_join(., sdm.upr.diff.2100.rcp45.b, by = c("x", "y")) %>%
+    left_join(., sdm.percdiff.2055.rcp85.b, by = c("x", "y")) %>%
+    left_join(., sdm.lwr.percdiff.2055.rcp85.b, by = c("x", "y")) %>%
+    left_join(., sdm.upr.percdiff.2055.rcp85.b, by = c("x", "y")) %>%
+    left_join(., sdm.percdiff.2100.rcp85.b, by = c("x", "y")) %>%
+    left_join(., sdm.lwr.percdiff.2100.rcp85.b, by = c("x", "y")) %>%
+    left_join(., sdm.upr.percdiff.2100.rcp85.b, by = c("x", "y")) %>%
+    left_join(., sdm.percdiff.2055.rcp45.b, by = c("x", "y")) %>%
+    left_join(., sdm.lwr.percdiff.2055.rcp45.b, by = c("x", "y")) %>%
+    left_join(., sdm.upr.percdiff.2055.rcp45.b, by = c("x", "y")) %>%
+    left_join(., sdm.percdiff.2100.rcp45.b, by = c("x", "y")) %>%
+    left_join(., sdm.lwr.percdiff.2100.rcp45.b, by = c("x", "y")) %>%
+    left_join(., sdm.upr.percdiff.2100.rcp45.b, by = c("x", "y")) %>%
     left_join(., combo.map.base, by = c("x", "y")) %>%
-    left_join(., combo.map.fut.mu, by = c("x", "y")) %>%
-    left_join(., combo.map.fut.pct05, by = c("x", "y")) %>%
-    left_join(., combo.map.fut.pct95, by = c("x", "y")) %>%
-    left_join(., combo.diff, by = c("x", "y")) %>%
-    left_join(., combo.lwr.diff, by = c("x", "y")) %>%
-    left_join(., combo.upr.diff, by = c("x", "y")) %>%
-    left_join(., combo.percdiff, by = c("x", "y")) %>%
-    left_join(., combo.lwr.percdiff, by = c("x", "y")) %>%
-    left_join(., combo.upr.percdiff, by = c("x", "y"))
+    left_join(., combo.map.2055.rcp85.mu, by = c("x", "y")) %>%
+    left_join(., combo.map.2055.rcp85.pct05, by = c("x", "y")) %>%
+    left_join(., combo.map.2055.rcp85.pct95, by = c("x", "y")) %>%
+    left_join(., combo.map.2100.rcp85.mu, by = c("x", "y")) %>%
+    left_join(., combo.map.2100.rcp85.pct05, by = c("x", "y")) %>%
+    left_join(., combo.map.2100.rcp85.pct95, by = c("x", "y")) %>%
+    left_join(., combo.map.2055.rcp45.mu, by = c("x", "y")) %>%
+    left_join(., combo.map.2055.rcp45.pct05, by = c("x", "y")) %>%
+    left_join(., combo.map.2055.rcp45.pct95, by = c("x", "y")) %>%
+    left_join(., combo.map.2100.rcp45.mu, by = c("x", "y")) %>%
+    left_join(., combo.map.2100.rcp45.pct05, by = c("x", "y")) %>%
+    left_join(., combo.map.2100.rcp45.pct95, by = c("x", "y")) %>%
+    left_join(., combo.diff.2055.rcp85, by = c("x", "y")) %>%
+    left_join(., combo.lwr.diff.2055.rcp85, by = c("x", "y")) %>%
+    left_join(., combo.upr.diff.2055.rcp85, by = c("x", "y")) %>%
+    left_join(., combo.diff.2100.rcp85, by = c("x", "y")) %>%
+    left_join(., combo.lwr.diff.2100.rcp85, by = c("x", "y")) %>%
+    left_join(., combo.upr.diff.2100.rcp85, by = c("x", "y")) %>%
+    left_join(., combo.diff.2055.rcp45, by = c("x", "y")) %>%
+    left_join(., combo.lwr.diff.2055.rcp45, by = c("x", "y")) %>%
+    left_join(., combo.upr.diff.2055.rcp45, by = c("x", "y")) %>%
+    left_join(., combo.diff.2100.rcp45, by = c("x", "y")) %>%
+    left_join(., combo.lwr.diff.2100.rcp45, by = c("x", "y")) %>%
+    left_join(., combo.upr.diff.2100.rcp45, by = c("x", "y")) %>%
+    left_join(., combo.percdiff.2055.rcp85, by = c("x", "y")) %>%
+    left_join(., combo.lwr.percdiff.2055.rcp85, by = c("x", "y")) %>%
+    left_join(., combo.upr.percdiff.2055.rcp85, by = c("x", "y")) %>%
+    left_join(., combo.percdiff.2100.rcp85, by = c("x", "y")) %>%
+    left_join(., combo.lwr.percdiff.2100.rcp85, by = c("x", "y")) %>%
+    left_join(., combo.upr.percdiff.2100.rcp85, by = c("x", "y")) %>%
+    left_join(., combo.percdiff.2055.rcp45, by = c("x", "y")) %>%
+    left_join(., combo.lwr.percdiff.2055.rcp45, by = c("x", "y")) %>%
+    left_join(., combo.upr.percdiff.2055.rcp45, by = c("x", "y")) %>%
+    left_join(., combo.percdiff.2100.rcp45, by = c("x", "y")) %>%
+    left_join(., combo.lwr.percdiff.2100.rcp45, by = c("x", "y")) %>%
+    left_join(., combo.upr.percdiff.2100.rcp45, by = c("x", "y"))
   projections.dat$COMNAME<- spp
   projections.dat$SEASON<- season
   projections.dat<- projections.dat %>%
@@ -1304,7 +1704,7 @@ for(i in seq_along(res.files)){
 }
 
 out.dir<- "~/GitHub/COCA/Results/NormalVoting_BiomassIncPresNoExposure_05072019/" 
-saveRDS(result, file = paste(out.dir, "SDMPredictions.rds", sep = ""))
+saveRDS(result, file = paste(out.dir, "SDMPredictionsBothRCP.rds", sep = ""))
 
 
 # Predictions summarized for communities ----------------------------------------------
@@ -1372,7 +1772,7 @@ fish_avail_func<- function(df) {
 }
 
 # Bring in fishing footprints
-all.foot.dat<- readRDS(here("Data", "VTR fishing footprints by community and gear type 2011-2015.rds"))
+all.foot.dat<- readRDS("~/GitHub/COCA/Data/VTR fishing footprints by community and gear type 2011-2015.rds")
 ports.names<- all.foot.dat$JGS.COMMUNITY
 
 # Are there any "empty" footprints?
@@ -1598,7 +1998,7 @@ if(FALSE){
 }
 
 # Read in results and apply fish availability function to each of the projections datasets
-results<- read_rds(here("Results/NormalVoting_BiomassIncPresNoExposure_05072019", "SDMPredictions.rds"))
+results<- read_rds("~/GitHub/COCA/Results/NormalVoting_BiomassIncPresNoExposure_05072019/SDMPredictionsBothRCP.rds")
 
 # Quick check --
 results.check<- results %>%
@@ -1611,10 +2011,10 @@ results.sub<- results[-which(grepl("diff", results$Proj.Class)), ]
 results.sub<- results.sub %>%
   mutate(., "Fish.Availability" = map(Projections, possibly(fish_avail_func, NA)))
 
-saveRDS(results.sub, here("Results/NormalVoting_BiomassIncPresNoExposure_05072019", "FishAvailability.rds"))
+saveRDS(results.sub, "~/GitHub/COCA/Results/NormalVoting_BiomassIncPresNoExposure_05072019/FishAvailabilityBothRCP.rds")
 
 # Ideally, we want species-season-port and then all the changes as columns...
-results<- readRDS(here("Results/NormalVoting_BiomassIncPresNoExposure_05072019", "FishAvailability.rds"))
+results<- readRDS("~/GitHub/COCA/Results/NormalVoting_BiomassIncPresNoExposure_05072019/FishAvailabilityBothRCP.rds")
 results$spp.season<- paste(results$COMNAME, results$SEASON, sep = ".")
 spp.season<- paste(rep(unique(results$COMNAME), each = 2), rep(c("FALL", "SPRING")), sep = ".")
 
@@ -1648,12 +2048,30 @@ for(i in seq_along(spp.season)){
 result<- result %>%
   group_by(., COMNAME, Port, Stat) %>%
   summarize_if(., is.numeric, mean, na.rm = TRUE) %>%
-  mutate(., "Future_mean_diff.combo.b" = Future_mean.combo.b - Baseline.combo.b,
-         "Future_cold_diff.combo.b" = Future_cold.combo.b - Baseline.combo.b,
-         "Future_warm_diff.combo.b" = Future_warm.combo.b - Baseline.combo.b,
-         "Future_mean_percdiff.combo.b" = 100*(Future_mean_diff.combo.b/Baseline.combo.b),
-         "Future_cold_percdiff.combo.b" = 100*(Future_cold_diff.combo.b/Baseline.combo.b),
-         "Future_warm_percdiff.combo.b" = 100*(Future_warm_diff.combo.b/Baseline.combo.b))
+  mutate(., "Future_2055_rcp45_mean_diff.combo.b" = Future_2055_rcp45_mean.combo.b - Baseline.combo.b,
+         "Future_2055_rcp45_cold_diff.combo.b" = Future_2055_rcp45_cold.combo.b - Baseline.combo.b,
+         "Future_2055_rcp45_warm_diff.combo.b" = Future_2055_rcp45_warm.combo.b - Baseline.combo.b,
+         "Future_2100_rcp45_mean_diff.combo.b" = Future_2100_rcp45_mean.combo.b - Baseline.combo.b,
+         "Future_2100_rcp45_cold_diff.combo.b" = Future_2100_rcp45_cold.combo.b - Baseline.combo.b,
+         "Future_2100_rcp45_warm_diff.combo.b" = Future_2100_rcp45_warm.combo.b - Baseline.combo.b,
+         "Future_2055_rcp85_mean_diff.combo.b" = Future_2055_rcp85_mean.combo.b - Baseline.combo.b,
+         "Future_2055_rcp85_cold_diff.combo.b" = Future_2055_rcp85_cold.combo.b - Baseline.combo.b,
+         "Future_2055_rcp85_warm_diff.combo.b" = Future_2055_rcp85_warm.combo.b - Baseline.combo.b,
+         "Future_2100_rcp85_mean_diff.combo.b" = Future_2100_rcp85_mean.combo.b - Baseline.combo.b,
+         "Future_2100_rcp85_cold_diff.combo.b" = Future_2100_rcp85_cold.combo.b - Baseline.combo.b,
+         "Future_2100_rcp85_warm_diff.combo.b" = Future_2100_rcp85_warm.combo.b - Baseline.combo.b,
+         "Future_2055_rcp45_mean_percdiff.combo.b" = 100*(Future_2055_rcp45_mean_diff.combo.b/Baseline.combo.b),
+         "Future_2055_rcp45_cold_percdiff.combo.b" = 100*(Future_2055_rcp45_cold_diff.combo.b/Baseline.combo.b),
+         "Future_2055_rcp45_warm_percdiff.combo.b" = 100*(Future_2055_rcp45_warm_diff.combo.b/Baseline.combo.b),
+         "Future_2100_rcp45_mean_percdiff.combo.b" = 100*(Future_2100_rcp45_mean_diff.combo.b/Baseline.combo.b),
+         "Future_2100_rcp45_cold_percdiff.combo.b" = 100*(Future_2100_rcp45_cold_diff.combo.b/Baseline.combo.b),
+         "Future_2100_rcp45_warm_percdiff.combo.b" = 100*(Future_2100_rcp45_warm_diff.combo.b/Baseline.combo.b),
+         "Future_2055_rcp85_mean_percdiff.combo.b" = 100*(Future_2055_rcp85_mean_diff.combo.b/Baseline.combo.b),
+         "Future_2055_rcp85_cold_percdiff.combo.b" = 100*(Future_2055_rcp85_cold_diff.combo.b/Baseline.combo.b),
+         "Future_2055_rcp85_warm_percdiff.combo.b" = 100*(Future_2055_rcp85_warm_diff.combo.b/Baseline.combo.b),
+         "Future_2100_rcp85_mean_percdiff.combo.b" = 100*(Future_2100_rcp85_mean_diff.combo.b/Baseline.combo.b),
+         "Future_2100_rcp85_cold_percdiff.combo.b" = 100*(Future_2100_rcp85_cold_diff.combo.b/Baseline.combo.b),
+         "Future_2100_rcp85_warm_percdiff.combo.b" = 100*(Future_2100_rcp85_warm_diff.combo.b/Baseline.combo.b))
 
 # Check -- Black sea bass stonington
 check<- result %>%
@@ -1666,9 +2084,21 @@ unique(check2$SEASON)
 
 # Answer -- spring season!
 # Change all SD stat percent changes to NA
-result$Future_mean_percdiff.combo.b[result$Stat == "SD"]<- NA
-result$Future_cold_percdiff.combo.b[result$Stat == "SD"]<- NA
-result$Future_warm_percdiff.combo.b[result$Stat == "SD"]<- NA
+result$Future_2055_rcp45_mean_percdiff.combo.b[result$Stat == "SD"]<- NA
+result$Future_2055_rcp45_cold_percdiff.combo.b[result$Stat == "SD"]<- NA
+result$Future_2055_rcp45_warm_percdiff.combo.b[result$Stat == "SD"]<- NA
+
+result$Future_2100_rcp45_mean_percdiff.combo.b[result$Stat == "SD"]<- NA
+result$Future_2100_rcp45_cold_percdiff.combo.b[result$Stat == "SD"]<- NA
+result$Future_2100_rcp45_warm_percdiff.combo.b[result$Stat == "SD"]<- NA
+
+result$Future_2055_rcp85_mean_percdiff.combo.b[result$Stat == "SD"]<- NA
+result$Future_2055_rcp85_cold_percdiff.combo.b[result$Stat == "SD"]<- NA
+result$Future_2055_rcp85_warm_percdiff.combo.b[result$Stat == "SD"]<- NA
+
+result$Future_2100_rcp85_mean_percdiff.combo.b[result$Stat == "SD"]<- NA
+result$Future_2100_rcp85_cold_percdiff.combo.b[result$Stat == "SD"]<- NA
+result$Future_2100_rcp85_warm_percdiff.combo.b[result$Stat == "SD"]<- NA
 
 # Temp work
 temp<- result %>%
@@ -1719,20 +2149,57 @@ port.data.out$StateOnly<- unlist(lapply(comm.names.split, "[", 2))
 
 port.data.out<- port.data.out %>%
   ungroup() %>%
-  dplyr::select(., COMNAME, Port_GearType, CommunityOnly, StateOnly, Gear, Footprint, colnames(port.data.out)[3:21]) %>%
+  dplyr::select(., COMNAME, Port_GearType, CommunityOnly, StateOnly, Gear, Footprint, colnames(port.data.out)[3:66]) %>%
   gather(., "ProjectionScenario", "Value", -COMNAME, -Port_GearType, -CommunityOnly, -StateOnly, -Gear, -Footprint, -Stat) %>%
   dplyr::select(., COMNAME, CommunityOnly, StateOnly, Gear, Footprint, ProjectionScenario, Stat, Value)
 
-out.dir<- "/Volumes/Shared/Research/COCA-conf/SDM and CFDERS Integration/Data/SDM Projections/"
+out.dir<- "~/GitHub/COCA/Results/NormalVoting_BiomassIncPresNoExposure_05072019/"
 
-write_csv(port.data.out, paste(out.dir, "SppPortGearData_06032019.csv", sep = ""))
+write_csv(port.data.out, paste(out.dir, "SppPortGearData_BothRCPs.csv", sep = ""))
 
 ## A bit of clean up -- Kathy and Brian probably don't need all of this stuff
-ProjectionScenario.Keep<- c("Baseline.combo.b", "Future_mean.combo.b", "Future_mean_diff.combo.b", "Future_mean_percdiff.combo.b", "Future_warm.combo.b", "Future_warm_diff.combo.b", "Future_warm_percdiff.combo.b",  "Future_cold.combo.b", "Future_cold_diff.combo.b", "Future_cold_percdiff.combo.b")
+ProjectionScenario.Keep<- c("Baseline.combo.b", 
+                            "Future_2055_rcp45_mean.combo.b", 
+                            "Future_2055_rcp45_mean_diff.combo.b", 
+                            "Future_2055_rcp45_mean_percdiff.combo.b", 
+                            "Future_2055_rcp45_warm.combo.b", 
+                            "Future_2055_rcp45_warm_diff.combo.b", 
+                            "Future_2055_rcp45_warm_percdiff.combo.b",  
+                            "Future_2055_rcp45_cold.combo.b", 
+                            "Future_2055_rcp45_cold_diff.combo.b", 
+                            "Future_2055_rcp45_cold_percdiff.combo.b",
+                            "Future_2100_rcp45_mean.combo.b", 
+                            "Future_2100_rcp45_mean_diff.combo.b", 
+                            "Future_2100_rcp45_mean_percdiff.combo.b", 
+                            "Future_2100_rcp45_warm.combo.b", 
+                            "Future_2100_rcp45_warm_diff.combo.b", 
+                            "Future_2100_rcp45_warm_percdiff.combo.b",  
+                            "Future_2100_rcp45_cold.combo.b", 
+                            "Future_2100_rcp45_cold_diff.combo.b", 
+                            "Future_2100_rcp45_cold_percdiff.combo.b",
+                            "Future_2055_rcp85_mean.combo.b", 
+                            "Future_2055_rcp85_mean_diff.combo.b", 
+                            "Future_2055_rcp85_mean_percdiff.combo.b", 
+                            "Future_2055_rcp85_warm.combo.b", 
+                            "Future_2055_rcp85_warm_diff.combo.b", 
+                            "Future_2055_rcp85_warm_percdiff.combo.b",  
+                            "Future_2055_rcp85_cold.combo.b", 
+                            "Future_2055_rcp85_cold_diff.combo.b", 
+                            "Future_2055_rcp85_cold_percdiff.combo.b",
+                            "Future_2100_rcp85_mean.combo.b", 
+                            "Future_2100_rcp85_mean_diff.combo.b", 
+                            "Future_2100_rcp85_mean_percdiff.combo.b", 
+                            "Future_2100_rcp85_warm.combo.b", 
+                            "Future_2100_rcp85_warm_diff.combo.b", 
+                            "Future_2100_rcp85_warm_percdiff.combo.b",  
+                            "Future_2100_rcp85_cold.combo.b", 
+                            "Future_2100_rcp85_cold_diff.combo.b", 
+                            "Future_2100_rcp85_cold_percdiff.combo.b")
+
 port.data.out.filtered<- port.data.out %>%
   filter(., Footprint == "Regular" & Stat == "Mean") %>%
   filter(., ProjectionScenario %in% ProjectionScenario.Keep)
-write_csv(port.data.out.filtered, paste(out.dir, "SppPortGearData_Filtered_06032019.csv", sep = ""))
+write_csv(port.data.out.filtered, paste(out.dir, "SppPortGearData_Filtered_BothRCPs.csv", sep = ""))
 
 # Let's add in CFDERRS ports...
 vtr.cfderrs.table<- read_csv("~/GitHub/COCA-EcoAndEcon/Results/VTR_CFDERRS_Comparison_Edited_NoCounties.csv")
@@ -1749,7 +2216,7 @@ port.data.out<- port.data.out %>%
 colnames(port.data.out)<- c("CommonName", "Community", "CFDERSPortCode", "CFDERSPortName", "Gear", "Footprint", "ProjectionScenario", "Statistic", "Value")
 
 port.data.out$Gear<- gsub("[.]", "_", port.data.out$Gear)
-write.csv(port.data.out, "~/GitHub/COCA/Results/PortData06032019.csv")
+write.csv(port.data.out, "~/GitHub/COCA/Results/PortDataBothRCPs.csv")
 
 # Filter for Brad...
 scenarios.keep<- c("Baseline.combo.b", "Future_mean.combo.b", "Future_mean_diff.combo.b", "Future_mean_percdiff.combo.b", "Future_cold.combo.b", "Future_cold_diff.combo.b", "Future_cold_percdiff.combo.b", "Future_warm.combo.b", "Future_warm_diff.combo.b", "Future_warm_percdiff.combo.b")
@@ -1946,7 +2413,94 @@ ggplot2::ggsave(filename = paste(out.dir, "SpringTaylorDiagram", ".jpg", sep = "
 
 # Results — SDM shelfwide and regional changes ----------------------------
 # Read in projections
+results<- read_rds(paste(out.dir, "SDMPredictionsBothRCP.rds", sep = "")) # This should have everything we need. 
 results<- read_rds(paste(out.dir, "SDMPredictions.rds", sep = "")) # This should have everything we need. 
+
+if(FALSE){
+  results$Proj.Class<- str_replace_all(results$Proj.Class, c("cold" = "5thpercentile", "mean" = "Mean", "warm" = "95thpercentile"))
+  results.okn<- results %>%
+    dplyr::filter(., grepl("sdm.b", Proj.Class))
+  
+  tibb_to_rast<- function(df){
+    temp<- data.frame(df)
+    names(temp)[3]<- "z"
+    rast.out<- rasterFromXYZ(temp)
+    return(rast.out)
+  }
+  
+  results.okn.list<- results.okn %>%
+    mutate(., "Raster" = map(Projections, tibb_to_rast))
+  
+  okn.stack<- raster::stack(results.okn.list$Raster)
+  names(okn.stack)<- paste(as.character(results.okn$COMNAME), as.character(results.okn$SEASON), as.character(results.okn$Proj.Class), sep = "/")
+  
+  
+  all.haddock<- okn.stack[[which(grepl("HADDOCK", names(okn.stack)))]]
+  na.value<- -99999
+  all.haddock[is.na(all.haddock)]<- na.value
+  all.haddock[is.infinite(all.haddock)]<- na.value
+  all.haddock.array<- as.array(all.haddock)
+  metadata<- list(
+    lon = list(units = "degrees_north"),
+    lat = list(units = "degrees_east"),
+    var = list(units = "kg per tow")
+  )
+  attr(all.haddock.array, 'variables')<- metadata
+  names(dim(all.haddock.array))<- c("lon", "lat", "var")
+  easyNCDF::ArrayToNc(all.haddock.array, "~/Box/Andrew Allyn/Temp/AllHaddockResults.nc")
+  
+  # Other option....
+  # path and file name, set dname
+  ncpath <- "~/Box/Andrew Allyn/Temp/"
+  ncname <- "AllHaddockResults"  
+  ncfname <- paste(ncpath, ncname, ".nc", sep="")
+  dname <- "sdm"  # note: tmp means temperature (not temporary)
+  
+  # create and write the netCDF file -- ncdf4 version
+  # define dimensions
+  rast.coords<- data.frame(coordinates(all.haddock[[1]]))
+  londim <- ncdim_def("lon", "degrees_east", as.double(unique(rast.coords$x)))
+  latdim <- ncdim_def("lat", "degrees_north", as.double(unique(rast.coords$y)))
+
+  # define variables
+  fillvalue<- 1e32
+  var.list.out<- vector("list", length = length(names(all.haddock)))
+  
+  for(i in seq_along(names(all.haddock))){
+    dlname.temp<- names(all.haddock)[i]
+    var.list.out[[i]]<- ncvar_def(dlname.temp, "kg_tow", list(londim, latdim), fillvalue, dlname.temp, prec="single")
+    names(var.list.out)[i]<- dlname.temp
+  }
+  
+  # create netCDF file and put arrays
+  ncout<- nc_create(ncfname, var.list.out, force_v4=TRUE)
+  
+  # put variables
+  for(i in seq_along(names(all.haddock))){
+    dlname.temp<- names(all.haddock)[i]
+    ncvar_put(ncout, varid = dlname.temp, start = c(1, 1), count = c(-1, -1), values(all.haddock[[i]]))
+  }
+  
+  ncatt_put(ncout, "lon", "axis", "X")
+  ncatt_put(ncout, "lat", "axis", "Y")
+  
+  ncatt_put(ncout, 0, "title", "Haddock SDM Results")
+  ncatt_put(ncout,0, "institution", "GMRI")
+  history <- paste("Andrew Allyn", date(), sep=", ")
+  ncatt_put(ncout,0,"history", history)
+  
+  # Get a summary of the created file:
+  ncout
+  
+  # close the file, writing data to disk
+  nc_close(ncout)
+  
+  one.haddock<- all.haddock[[1]]
+  one.out<- "~/Box/Andrew Allyn/Temp/HaddockBaselinePredictedBiomass.nc"
+  writeRaster(one.haddock, one.out, overwrite=TRUE, format="CDF", varname="Biomass", varunit="KG/tow", 
+              longname="Average projected species biomass (kilograms per tow) in 2011-2015", xname="lon", yname="lat")
+ 
+}
 
 # Filter species 
 dat.sub<- results %>%
@@ -1972,10 +2526,11 @@ overlay_func<- function(df, region, proj.use = proj4string(nelme)){
   coordinates(pts.temp)<- ~x+y
   proj4string(pts.temp)<- proj.use
   
-  switch(region,
+  region.avg<- switch(region,
          NELME = mean(dat.use[,3], na.rm = T),
          GOM = mean(data.frame(pts.temp[!is.na(over(pts.temp, as(gom, "SpatialPolygons"))),])[,3], na.rm = T),
          South = mean(data.frame(pts.temp[!is.na(over(pts.temp, as(south, "SpatialPolygons"))),])[,3], na.rm = T))
+  return(region.avg)
 }
 
 preds.df.sub<- dat.sub %>%
@@ -1985,34 +2540,125 @@ preds.df.sub<- dat.sub %>%
 
 
 # Now, we want regional differences (raw and percentages)...
-preds.df.sub<- preds.df.sub %>%
-  dplyr::select(., COMNAME, SEASON, Proj.Class, NELME.Mean, GOM.Mean, South.Mean) %>%
-  gather(., Region, Projections, -COMNAME, -SEASON, -Proj.Class) %>%
-  mutate(., Proj.ClassandRegion = paste(Proj.Class, Region, sep = "_")) %>%
-  dplyr::select(., COMNAME, SEASON, Proj.ClassandRegion, Projections) %>%
-  spread(., Proj.ClassandRegion, Projections) %>%
-  mutate_if(., is.list, as.numeric) %>%
-  mutate(., "NELME.Mean.Change.mu.b" = Future_mean.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
-         "NELME.Mean.Change.warm.b" = Future_warm.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
-         "NELME.Mean.Change.cold.b" = Future_cold.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
-         "NELME.Mean.Perc.Change.mu.b" = 100*(NELME.Mean.Change.mu.b/Baseline.sdm.b_NELME.Mean),
-         "NELME.Mean.Perc.Change.warm.b" = 100*(NELME.Mean.Change.warm.b/Baseline.sdm.b_NELME.Mean),
-         "NELME.Mean.Perc.Change.cold.b" = 100*(NELME.Mean.Change.cold.b/Baseline.sdm.b_NELME.Mean),
-         "GOM.Mean.Change.mu.b" = Future_mean.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
-         "GOM.Mean.Change.warm.b" = Future_warm.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
-         "GOM.Mean.Change.cold.b" = Future_cold.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
-         "GOM.Mean.Perc.Change.mu.b" = 100*(GOM.Mean.Change.mu.b/Baseline.sdm.b_GOM.Mean),
-         "GOM.Mean.Perc.Change.warm.b" = 100*(GOM.Mean.Change.warm.b/Baseline.sdm.b_GOM.Mean),
-         "GOM.Mean.Perc.Change.cold.b" = 100*(GOM.Mean.Change.cold.b/Baseline.sdm.b_GOM.Mean),
-         "South.Mean.Change.mu.b" = Future_mean.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
-         "South.Mean.Change.warm.b" = Future_warm.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
-         "South.Mean.Change.cold.b" = Future_cold.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
-         "South.Mean.Perc.Change.mu.b" = 100*(South.Mean.Change.mu.b/Baseline.sdm.b_South.Mean),
-         "South.Mean.Perc.Change.warm.b" = 100*(South.Mean.Change.warm.b/Baseline.sdm.b_South.Mean),
-         "South.Mean.Perc.Change.cold.b" = 100*(South.Mean.Change.cold.b/Baseline.sdm.b_South.Mean))
+both.rcps<- FALSE
+if(both.rcps){
+  preds.df.sub<- preds.df.sub %>%
+    ungroup() %>%
+    dplyr::select(., COMNAME, SEASON, Proj.Class, NELME.Mean, GOM.Mean, South.Mean) %>%
+    gather(., Region, Projections, -COMNAME, -SEASON, -Proj.Class) %>%
+    mutate(., Proj.ClassandRegion = paste(Proj.Class, Region, sep = "_")) %>%
+    dplyr::select(., COMNAME, SEASON, Proj.ClassandRegion, Projections) %>%
+    spread(., Proj.ClassandRegion, Projections) %>%
+    mutate_if(., is.list, as.numeric) %>%
+    mutate(., "NELME.2055.rcp45.Mean.Change.mu.b" = Future_2055_rcp45_mean.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+           "NELME.2055.rcp45.Mean.Change.warm.b" = Future_2055_rcp45_warm.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+           "NELME.2055.rcp45.Mean.Change.cold.b" = Future_2055_rcp45_cold.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+           "NELME.2055.rcp45.Mean.Perc.Change.mu.b" = 100*(NELME.2055.rcp45.Mean.Change.mu.b/Baseline.sdm.b_NELME.Mean),
+           "NELME.2055.rcp45.Mean.Perc.Change.warm.b" = 100*(NELME.2055.rcp45.Mean.Change.warm.b/Baseline.sdm.b_NELME.Mean),
+           "NELME.2055.rcp45.Mean.Perc.Change.cold.b" = 100*(NELME.2055.rcp45.Mean.Change.cold.b/Baseline.sdm.b_NELME.Mean),
+           "GOM.2055.rcp45.Mean.Change.mu.b" = Future_2055_rcp45_mean.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
+           "GOM.2055.rcp45.Mean.Change.warm.b" = Future_2055_rcp45_warm.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
+           "GOM.2055.rcp45.Mean.Change.cold.b" = Future_2055_rcp45_cold.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
+           "GOM.2055.rcp45.Mean.Perc.Change.mu.b" = 100*(GOM.2055.rcp45.Mean.Change.mu.b/Baseline.sdm.b_GOM.Mean),
+           "GOM.2055.rcp45.Mean.Perc.Change.warm.b" = 100*(GOM.2055.rcp45.Mean.Change.warm.b/Baseline.sdm.b_GOM.Mean),
+           "GOM.2055.rcp45.Mean.Perc.Change.cold.b" = 100*(GOM.2055.rcp45.Mean.Change.cold.b/Baseline.sdm.b_GOM.Mean),
+           "South.2055.rcp45.Mean.Change.mu.b" = Future_2055_rcp45_mean.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
+           "South.2055.rcp45.Mean.Change.warm.b" = Future_2055_rcp45_warm.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
+           "South.2055.rcp45.Mean.Change.cold.b" = Future_2055_rcp45_cold.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
+           "South.2055.rcp45.Mean.Perc.Change.mu.b" = 100*(South.2055.rcp45.Mean.Change.mu.b/Baseline.sdm.b_South.Mean),
+           "South.2055.rcp45.Mean.Perc.Change.warm.b" = 100*(South.2055.rcp45.Mean.Change.warm.b/Baseline.sdm.b_South.Mean),
+           "South.2055.rcp45.Mean.Perc.Change.cold.b" = 100*(South.2055.rcp45.Mean.Change.cold.b/Baseline.sdm.b_South.Mean),
+           
+           # 2100 RCP45
+           "NELME.2100.rcp45.Mean.Change.mu.b" = Future_2100_rcp45_mean.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+           "NELME.2100.rcp45.Mean.Change.warm.b" = Future_2100_rcp45_warm.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+           "NELME.2100.rcp45.Mean.Change.cold.b" = Future_2100_rcp45_cold.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+           "NELME.2100.rcp45.Mean.Perc.Change.mu.b" = 100*(NELME.2100.rcp45.Mean.Change.mu.b/Baseline.sdm.b_NELME.Mean),
+           "NELME.2100.rcp45.Mean.Perc.Change.warm.b" = 100*(NELME.2100.rcp45.Mean.Change.warm.b/Baseline.sdm.b_NELME.Mean),
+           "NELME.2100.rcp45.Mean.Perc.Change.cold.b" = 100*(NELME.2100.rcp45.Mean.Change.cold.b/Baseline.sdm.b_NELME.Mean),
+           "GOM.2100.rcp45.Mean.Change.mu.b" = Future_2100_rcp45_mean.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
+           "GOM.2100.rcp45.Mean.Change.warm.b" = Future_2100_rcp45_warm.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
+           "GOM.2100.rcp45.Mean.Change.cold.b" = Future_2100_rcp45_cold.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
+           "GOM.2100.rcp45.Mean.Perc.Change.mu.b" = 100*(GOM.2100.rcp45.Mean.Change.mu.b/Baseline.sdm.b_GOM.Mean),
+           "GOM.2100.rcp45.Mean.Perc.Change.warm.b" = 100*(GOM.2100.rcp45.Mean.Change.warm.b/Baseline.sdm.b_GOM.Mean),
+           "GOM.2100.rcp45.Mean.Perc.Change.cold.b" = 100*(GOM.2100.rcp45.Mean.Change.cold.b/Baseline.sdm.b_GOM.Mean),
+           "South.2100.rcp45.Mean.Change.mu.b" = Future_2100_rcp45_mean.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
+           "South.2100.rcp45.Mean.Change.warm.b" = Future_2100_rcp45_warm.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
+           "South.2100.rcp45.Mean.Change.cold.b" = Future_2100_rcp45_cold.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
+           "South.2100.rcp45.Mean.Perc.Change.mu.b" = 100*(South.2100.rcp45.Mean.Change.mu.b/Baseline.sdm.b_South.Mean),
+           "South.2100.rcp45.Mean.Perc.Change.warm.b" = 100*(South.2100.rcp45.Mean.Change.warm.b/Baseline.sdm.b_South.Mean),
+           "South.2100.rcp45.Mean.Perc.Change.cold.b" = 100*(South.2100.rcp45.Mean.Change.cold.b/Baseline.sdm.b_South.Mean),
+           
+           # 2055 RCP85
+           "NELME.2055.rcp85.Mean.Change.mu.b" = Future_2055_rcp85_mean.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+           "NELME.2055.rcp85.Mean.Change.warm.b" = Future_2055_rcp85_warm.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+           "NELME.2055.rcp85.Mean.Change.cold.b" = Future_2055_rcp85_cold.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+           "NELME.2055.rcp85.Mean.Perc.Change.mu.b" = 100*(NELME.2055.rcp85.Mean.Change.mu.b/Baseline.sdm.b_NELME.Mean),
+           "NELME.2055.rcp85.Mean.Perc.Change.warm.b" = 100*(NELME.2055.rcp85.Mean.Change.warm.b/Baseline.sdm.b_NELME.Mean),
+           "NELME.2055.rcp85.Mean.Perc.Change.cold.b" = 100*(NELME.2055.rcp85.Mean.Change.cold.b/Baseline.sdm.b_NELME.Mean),
+           "GOM.2055.rcp85.Mean.Change.mu.b" = Future_2055_rcp85_mean.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
+           "GOM.2055.rcp85.Mean.Change.warm.b" = Future_2055_rcp85_warm.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
+           "GOM.2055.rcp85.Mean.Change.cold.b" = Future_2055_rcp85_cold.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
+           "GOM.2055.rcp85.Mean.Perc.Change.mu.b" = 100*(GOM.2055.rcp85.Mean.Change.mu.b/Baseline.sdm.b_GOM.Mean),
+           "GOM.2055.rcp85.Mean.Perc.Change.warm.b" = 100*(GOM.2055.rcp85.Mean.Change.warm.b/Baseline.sdm.b_GOM.Mean),
+           "GOM.2055.rcp85.Mean.Perc.Change.cold.b" = 100*(GOM.2055.rcp85.Mean.Change.cold.b/Baseline.sdm.b_GOM.Mean),
+           "South.2055.rcp85.Mean.Change.mu.b" = Future_2055_rcp85_mean.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
+           "South.2055.rcp85.Mean.Change.warm.b" = Future_2055_rcp85_warm.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
+           "South.2055.rcp85.Mean.Change.cold.b" = Future_2055_rcp85_cold.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
+           "South.2055.rcp85.Mean.Perc.Change.mu.b" = 100*(South.2055.rcp85.Mean.Change.mu.b/Baseline.sdm.b_South.Mean),
+           "South.2055.rcp85.Mean.Perc.Change.warm.b" = 100*(South.2055.rcp85.Mean.Change.warm.b/Baseline.sdm.b_South.Mean),
+           "South.2055.rcp85.Mean.Perc.Change.cold.b" = 100*(South.2055.rcp85.Mean.Change.cold.b/Baseline.sdm.b_South.Mean),
+           
+           # 2100 RCP85
+           "NELME.2100.rcp85.Mean.Change.mu.b" = Future_2100_rcp85_mean.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+           "NELME.2100.rcp85.Mean.Change.warm.b" = Future_2100_rcp85_warm.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+           "NELME.2100.rcp85.Mean.Change.cold.b" = Future_2100_rcp85_cold.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+           "NELME.2100.rcp85.Mean.Perc.Change.mu.b" = 100*(NELME.2100.rcp85.Mean.Change.mu.b/Baseline.sdm.b_NELME.Mean),
+           "NELME.2100.rcp85.Mean.Perc.Change.warm.b" = 100*(NELME.2100.rcp85.Mean.Change.warm.b/Baseline.sdm.b_NELME.Mean),
+           "NELME.2100.rcp85.Mean.Perc.Change.cold.b" = 100*(NELME.2100.rcp85.Mean.Change.cold.b/Baseline.sdm.b_NELME.Mean),
+           "GOM.2100.rcp85.Mean.Change.mu.b" = Future_2100_rcp85_mean.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
+           "GOM.2100.rcp85.Mean.Change.warm.b" = Future_2100_rcp85_warm.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
+           "GOM.2100.rcp85.Mean.Change.cold.b" = Future_2100_rcp85_cold.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
+           "GOM.2100.rcp85.Mean.Perc.Change.mu.b" = 100*(GOM.2100.rcp85.Mean.Change.mu.b/Baseline.sdm.b_GOM.Mean),
+           "GOM.2100.rcp85.Mean.Perc.Change.warm.b" = 100*(GOM.2100.rcp85.Mean.Change.warm.b/Baseline.sdm.b_GOM.Mean),
+           "GOM.2100.rcp85.Mean.Perc.Change.cold.b" = 100*(GOM.2100.rcp85.Mean.Change.cold.b/Baseline.sdm.b_GOM.Mean),
+           "South.2100.rcp85.Mean.Change.mu.b" = Future_2100_rcp85_mean.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
+           "South.2100.rcp85.Mean.Change.warm.b" = Future_2100_rcp85_warm.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
+           "South.2100.rcp85.Mean.Change.cold.b" = Future_2100_rcp85_cold.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
+           "South.2100.rcp85.Mean.Perc.Change.mu.b" = 100*(South.2100.rcp85.Mean.Change.mu.b/Baseline.sdm.b_South.Mean),
+           "South.2100.rcp85.Mean.Perc.Change.warm.b" = 100*(South.2100.rcp85.Mean.Change.warm.b/Baseline.sdm.b_South.Mean),
+           "South.2100.rcp85.Mean.Perc.Change.cold.b" = 100*(South.2100.rcp85.Mean.Change.cold.b/Baseline.sdm.b_South.Mean))
+} else {
+  preds.df.sub<- preds.df.sub %>%
+    ungroup() %>%
+    dplyr::select(., COMNAME, SEASON, Proj.Class, NELME.Mean, GOM.Mean, South.Mean) %>%
+    gather(., Region, Projections, -COMNAME, -SEASON, -Proj.Class) %>%
+    mutate(., Proj.ClassandRegion = paste(Proj.Class, Region, sep = "_")) %>%
+    dplyr::select(., COMNAME, SEASON, Proj.ClassandRegion, Projections) %>%
+    spread(., Proj.ClassandRegion, Projections) %>%
+    mutate_if(., is.list, as.numeric) %>%
+    mutate(., "NELME.2055.rcp85.Mean.Change.mu.b" = Future_mean.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+           "NELME.2055.rcp85.Mean.Change.warm.b" = Future_warm.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+           "NELME.2055.rcp85.Mean.Change.cold.b" = Future_cold.sdm.b_NELME.Mean - Baseline.sdm.b_NELME.Mean,
+           "NELME.2055.rcp85.Mean.Perc.Change.mu.b" = 100*(NELME.2055.rcp85.Mean.Change.mu.b/Baseline.sdm.b_NELME.Mean),
+           "NELME.2055.rcp85.Mean.Perc.Change.warm.b" = 100*(NELME.2055.rcp85.Mean.Change.warm.b/Baseline.sdm.b_NELME.Mean),
+           "NELME.2055.rcp85.Mean.Perc.Change.cold.b" = 100*(NELME.2055.rcp85.Mean.Change.cold.b/Baseline.sdm.b_NELME.Mean),
+           "GOM.2055.rcp85.Mean.Change.mu.b" = Future_mean.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
+           "GOM.2055.rcp85.Mean.Change.warm.b" = Future_warm.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
+           "GOM.2055.rcp85.Mean.Change.cold.b" = Future_cold.sdm.b_GOM.Mean - Baseline.sdm.b_GOM.Mean,
+           "GOM.2055.rcp85.Mean.Perc.Change.mu.b" = 100*(GOM.2055.rcp85.Mean.Change.mu.b/Baseline.sdm.b_GOM.Mean),
+           "GOM.2055.rcp85.Mean.Perc.Change.warm.b" = 100*(GOM.2055.rcp85.Mean.Change.warm.b/Baseline.sdm.b_GOM.Mean),
+           "GOM.2055.rcp85.Mean.Perc.Change.cold.b" = 100*(GOM.2055.rcp85.Mean.Change.cold.b/Baseline.sdm.b_GOM.Mean),
+           "South.2055.rcp85.Mean.Change.mu.b" = Future_mean.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
+           "South.2055.rcp85.Mean.Change.warm.b" = Future_warm.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
+           "South.2055.rcp85.Mean.Change.cold.b" = Future_cold.sdm.b_South.Mean - Baseline.sdm.b_South.Mean,
+           "South.2055.rcp85.Mean.Perc.Change.mu.b" = 100*(South.2055.rcp85.Mean.Change.mu.b/Baseline.sdm.b_South.Mean),
+           "South.2055.rcp85.Mean.Perc.Change.warm.b" = 100*(South.2055.rcp85.Mean.Change.warm.b/Baseline.sdm.b_South.Mean),
+           "South.2055.rcp85.Mean.Perc.Change.cold.b" = 100*(South.2055.rcp85.Mean.Change.cold.b/Baseline.sdm.b_South.Mean))
+}
 
 preds.df.sub.perc.plot<- preds.df.sub %>%
-  dplyr::select(., COMNAME, SEASON, NELME.Mean.Perc.Change.mu.b, NELME.Mean.Perc.Change.warm.b, NELME.Mean.Perc.Change.cold.b, GOM.Mean.Perc.Change.mu.b, GOM.Mean.Perc.Change.warm.b, GOM.Mean.Perc.Change.cold.b, South.Mean.Perc.Change.mu.b, South.Mean.Perc.Change.warm.b, South.Mean.Perc.Change.cold.b) %>%
+  dplyr::select(., COMNAME, SEASON, NELME.2055.rcp85.Mean.Perc.Change.mu.b, NELME.2055.rcp85.Mean.Perc.Change.warm.b, NELME.2055.rcp85.Mean.Perc.Change.cold.b, GOM.2055.rcp85.Mean.Perc.Change.mu.b, GOM.2055.rcp85.Mean.Perc.Change.warm.b, GOM.2055.rcp85.Mean.Perc.Change.cold.b, South.2055.rcp85.Mean.Perc.Change.mu.b, South.2055.rcp85.Mean.Perc.Change.warm.b, South.2055.rcp85.Mean.Perc.Change.cold.b) %>%
   gather(., "Region_Scenario", "Change", -COMNAME, -SEASON)
 preds.df.sub.perc.plot$Region_Only<- unlist(lapply(strsplit(preds.df.sub.perc.plot$Region_Scenario, "[.]"), "[", 1))
 preds.df.sub.perc.plot$Scenario_Only<- unlist(lapply(strsplit(sub("[.]", "*", preds.df.sub.perc.plot$Region_Scenario), "[*]"), "[", 2))
@@ -2538,10 +3184,19 @@ dir_eff_func<- function(base, future, scale){
     return(diff)
   }
   
-  if(scale == "Percent")
+  if(scale == "Percent"){
     base.adj<- ifelse(base$Projection == 0, 0.0001, base$Projection)
-  diff<- data.frame("x" = base$x, "y" = base$y, "Perc.Diff" = (100*((future$Projection - base.adj)/base.adj)))
-  return(diff)
+    diff<- data.frame("x" = base$x, "y" = base$y, "Perc.Diff" = (100*((future$Projection - base.adj)/base.adj)))
+    return(diff)
+  }
+  
+  if(scale == "Percent.New"){
+    base.mean<- mean(base$Projection, na.rm = TRUE)
+    fut.mean<- mean(future$Projection, na.rm = TRUE)
+    diff<- data.frame("x" = 1, "y" = 1, "Perc.Diff" = (100*((fut.mean - base.mean)/base.mean)))
+    return(diff)
+  }
+  
 }
 
 dat.dir<- dat.dir %>%
@@ -2550,10 +3205,13 @@ dat.dir<- dat.dir %>%
          "Warm.Raw.Diff" = pmap(list(base = Baseline.sdm.b, future = Future_warm.sdm.b, scale = list("Raw")), possibly(dir_eff_func, NA)),
          "Mean.Perc.Diff" = pmap(list(base = Baseline.sdm.b, future = Future_mean.sdm.b, scale = list("Percent")), possibly(dir_eff_func, NA)),
          "Cold.Perc.Diff" = pmap(list(base = Baseline.sdm.b, future = Future_cold.sdm.b, scale = list("Percent")), possibly(dir_eff_func, NA)),
-         "Warm.Perc.Diff" = pmap(list(base = Baseline.sdm.b, future = Future_warm.sdm.b, scale = list("Percent")), possibly(dir_eff_func, NA)))
+         "Warm.Perc.Diff" = pmap(list(base = Baseline.sdm.b, future = Future_warm.sdm.b, scale = list("Percent")), possibly(dir_eff_func, NA)),
+         "Mean.PercNew.Diff" = pmap(list(base = Baseline.sdm.b, future = Future_mean.sdm.b, scale = list("Percent.New")), possibly(dir_eff_func, NA)),
+         "Cold.PercNew.Diff" = pmap(list(base = Baseline.sdm.b, future = Future_cold.sdm.b, scale = list("Percent.New")), possibly(dir_eff_func, NA)),
+         "Warm.PercNew.Diff" = pmap(list(base = Baseline.sdm.b, future = Future_warm.sdm.b, scale = list("Percent.New")), possibly(dir_eff_func, NA)))
 
 dat.dir<- dat.dir %>%
-  dplyr::select(., COMNAME, SEASON, DIRECTIONAL.EFFECT, Mean.Raw.Diff, Cold.Raw.Diff, Warm.Raw.Diff, Mean.Perc.Diff, Cold.Perc.Diff, Warm.Perc.Diff) %>%
+  dplyr::select(., COMNAME, SEASON, DIRECTIONAL.EFFECT, Mean.Raw.Diff, Cold.Raw.Diff, Warm.Raw.Diff, Mean.Perc.Diff, Cold.Perc.Diff, Warm.Perc.Diff, Mean.PercNew.Diff, Cold.PercNew.Diff, Warm.PercNew.Diff) %>%
   gather(., Proj.Class, Projections, -COMNAME, -SEASON, -DIRECTIONAL.EFFECT)
 
 # Get average
@@ -2571,7 +3229,7 @@ dat.dir.avg<- dat.dir %>%
   group_by(., Proj.Class, DIRECTIONAL.EFFECT) %>%
   summarise_at(., "Mean.Diff", c("mean", "sd"), na.rm = T) %>%
   drop_na(DIRECTIONAL.EFFECT)
-dat.dir.avg$Proj.Class<- factor(dat.dir.avg$Proj.Class, levels = c("Cold.Raw.Diff", "Mean.Raw.Diff", "Warm.Raw.Diff", "Cold.Perc.Diff", "Mean.Perc.Diff", "Warm.Perc.Diff"))
+dat.dir.avg$Proj.Class<- factor(dat.dir.avg$Proj.Class, levels = c("Cold.Raw.Diff", "Mean.Raw.Diff", "Warm.Raw.Diff", "Cold.Perc.Diff", "Mean.Perc.Diff", "Warm.Perc.Diff", "Cold.PercNew.Diff", "Mean.PercNew.Diff", "Warm.PercNew.Diff"))
 dat.dir.avg$DIRECTIONAL.EFFECT<- factor(dat.dir.avg$DIRECTIONAL.EFFECT, levels = c("Negative", "Neutral", "Positive"))
 
 plot.out.dir.raw<- ggplot(data = subset(dat.dir.avg, Proj.Class %in% c("Cold.Raw.Diff", "Mean.Raw.Diff", "Warm.Raw.Diff")), aes(x = DIRECTIONAL.EFFECT, y = mean)) +
@@ -2596,6 +3254,17 @@ plot.out.dir.perc<- ggplot(data = subset(dat.dir.avg, Proj.Class %in% c("Cold.Pe
   theme_bw() 
 ggsave(paste(out.dir, "DirectionaEffect_vs_PercChange.jpg", sep = ""), plot.out.dir.perc, width = 11, height = 8, units = "in")
 
+plot.out.dir.percnew<- ggplot(data = subset(dat.dir.avg, Proj.Class %in% c("Cold.PercNew.Diff", "Mean.PercNew.Diff", "Warm.PercNew.Diff")), aes(x = DIRECTIONAL.EFFECT, y = mean)) +
+  geom_point() + 
+  geom_errorbar(aes(ymin=mean-sd, ymax=mean+sd), width=.2,
+                position=position_dodge(0.05)) +
+  ylab("SDM Mean Projected Percent Change") +
+  xlab("NEVA Directional Effect Classification") +
+  facet_wrap(~Proj.Class, nrow = 1, scales = "free_y") +
+  geom_smooth(data = subset(dat.dir.avg, Proj.Class %in% c("Cold.PercNew.Diff", "Mean.PercNew.Diff", "Warm.PercNew.Diff")), aes(x = as.numeric(DIRECTIONAL.EFFECT), y = mean), method = "lm", se = FALSE) +
+  theme_bw() 
+ggsave(paste(out.dir, "DirectionaEffect_vs_PercNewChange.jpg", sep = ""), plot.out.dir.percnew, width = 11, height = 8, units = "in")
+
 ## What about looking into species that follow vs. deviate from expectations?
 # Directional effect
 dir.cuts<- list(c(-5000, -2.5, 2.5, 5000), c(-5000, -5, 5, 5000), c(-5000, -10, 10, 5000), c(-5000, -15, 15, 5000), c(-5000, -20, 20, 5000), c(-5000, -25, 25, 5000), c(-5000, -40, 40, 5000), c(-5000, -50, 50, 5000), c(-5000, -65, 65, 5000), c(-5000, -75, 75, 5000), c(-5000, -100, 100, 5000))
@@ -2605,7 +3274,7 @@ for(i in seq_along(dir.cuts)){
   dir.cuts.use<- dir.cuts[[i]]
   
   dat.dir.comp<- dat.dir %>%
-    filter(., Proj.Class == "Mean.Perc.Diff") %>%
+    filter(., Proj.Class == "Mean.PercNew.Diff") %>%
     group_by(., COMNAME, DIRECTIONAL.EFFECT, Proj.Class) %>%
     summarize_at(., "Mean.Diff", mean, na.rm = T)
   
@@ -2634,13 +3303,13 @@ for(i in seq_along(dir.cuts)){
   
   dat.dir.comp.count$DIRECTIONAL.EFFECT<- factor(dat.dir.comp.count$DIRECTIONAL.EFFECT, levels = c("Negative", "Neutral", "Positive"), labels = c("Negative\n(n = 18)", "Neutral\n(n = 9)", "Positive\n(n = 6)"))
   dat.dir.comp.count$Binned<- factor(dat.dir.comp.count$Binned, levels = c("Negative", "Neutral", "Positive"), labels = c("Negative\n(n = 9)", "Neutral\n(n = 7)", "Positive\n(n = 17)"))
- 
   
   dat.dir.comp.plot<- ggplot() +
     geom_text(data = dat.dir.comp.count, aes(x = DIRECTIONAL.EFFECT, y = Binned, label = NA), fontface = "bold") +
     geom_tile(data = dat.dir.comp.tile, aes(x = DIRECTIONAL.EFFECT, y = Binned), fill = NA, color = "black") +
     xlab("NEVA Directional Effect") +
-    ylab("SDM Directional Effect")
+    ylab("SDM Directional Effect") +
+    theme(panel.background = element_blank())
   
   dat.dir.labels<- dat.dir.comp %>%
     drop_na(., DIRECTIONAL.EFFECT, Binned) %>%
@@ -2653,12 +3322,13 @@ for(i in seq_along(dir.cuts)){
   
   set.seed(13331)
   dat.dir.comp.plot2<- dat.dir.comp.plot +
-    geom_text_repel(data = dat.dir.labels, aes(x = DIRECTIONAL.EFFECT, y = Binned, label = toTitleCase(tolower(COMNAME)), color = Functional.Group), size = 3, segment.color = NA, show.legend = FALSE) +
+    geom_text_repel(data = dat.dir.labels, aes(x = DIRECTIONAL.EFFECT, y = Binned, label = toTitleCase(tolower(COMNAME)), color = Functional.Group), size = 4, segment.color = NA, show.legend = FALSE) +
     geom_point(data = dat.dir.labels, aes(x = DIRECTIONAL.EFFECT, y = Binned, color = Functional.Group), alpha = 0.00001) +
     scale_color_manual(name = "Functional Group", values = c('#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02')) +
     ggtitle(paste(dir.cuts.use[2], ":", dir.cuts.use[3], " used for neutral bin", sep = "")) +
-    guides(color = guide_legend(override.aes = list(size = 3, color = c('#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02'), alpha = 1)))
-  ggsave(paste(out.dir, dir.cuts.use[2], "to", dir.cuts.use[3], "DirectionaEffectMatching.jpg", sep = ""), dat.dir.comp.plot2, width = 11, height = 8, units = "in")
+    guides(color = guide_legend(override.aes = list(size = 3, color = c('#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02'), alpha = 1))) +
+    theme(panel.background = element_blank())
+  ggsave(paste(out.dir, dir.cuts.use[2], "to", dir.cuts.use[3], "DirectionaEffectMatching.jpg", sep = ""), dat.dir.comp.plot2, width = 15, height = 10, units = "in")
 }
 
 # Sensitivity...
@@ -2699,7 +3369,8 @@ dat.sens.comp.plot<- ggplot() +
   geom_tile(data = dat.sens.comp.tile, aes(x = SENSITIVITY, y = Binned), fill = NA, color = "black") +
   geom_text(data = dat.sens.comp.count, aes(x = SENSITIVITY, y = Binned, label = NA), fontface = "bold") +
   xlab("NEVA Sensitivity") +
-  ylab("SDM Sensitivity")
+  ylab("SDM Sensitivity") +
+  theme(panel.background = element_blank())
 
 dat.sens.labels<- dat.sens.comp %>%
   drop_na(., SENSITIVITY, Binned) %>%
@@ -2711,202 +3382,14 @@ dat.sens.labels$SENSITIVITY<- factor(dat.sens.labels$SENSITIVITY, levels = c("Lo
 dat.sens.labels$Binned<- factor(dat.sens.labels$Binned, levels = c("Low", "Moderate", "High", "Very high"), labels = c("Low\n(n = 9)", "Moderate\n(n = 8)", "High\n(n = 8)", "Very high\n(n = 8)"))
 
 dat.sens.comp.plot2<- dat.sens.comp.plot +
-  geom_text_repel(data = dat.sens.labels, aes(x = SENSITIVITY, y = Binned, label = toTitleCase(tolower(COMNAME)), color = Functional.Group), size = 3, segment.color = NA) +
+  geom_text_repel(data = dat.sens.labels, aes(x = SENSITIVITY, y = Binned, label = toTitleCase(tolower(COMNAME)), color = Functional.Group), size = 4, segment.color = NA) +
   geom_point(data = dat.sens.labels, aes(x = SENSITIVITY, y = Binned, color = Functional.Group), alpha = 0.00001) +
   scale_color_manual(name = "Functional Group", values = c('#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02')) +
-  guides(color = guide_legend(override.aes = list(size = 3, color = c('#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02'), alpha = 1)))
-ggsave(paste(out.dir, "SensitivityMatching.jpg", sep = ""), dat.sens.comp.plot2, width = 12, height = 9, units = "in")
+  guides(color = guide_legend(override.aes = list(size = 3, color = c('#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02'), alpha = 1))) +
+  theme(panel.background = element_blank())
+ggsave(paste(out.dir, "SensitivityMatching.jpg", sep = ""), dat.sens.comp.plot2, width = 17, height = 10, units = "in")
 
 ### Random Forest model to test match vs. mismatching
-# Old
-if(FALSE){
-  # Qualitative data
-  dir.eff.dat<- read.csv("./Data/JHareDirectionalEffect.csv")
-  qual.dat<- read.csv("./Data/JHareQualitativeDataResults.csv")
-  
-  # Need to get one directional effect for each species and one rank for each species attribute for sensitivity and exposure...
-  # Wide to long format
-  qual.dat.l<- gather(qual.dat, "Score", "Votes", Low, Moderate, High, Very.High)
-  qual.dat.l<- arrange(qual.dat.l, Species, Functional.Group, Attribute, Score)
-  
-  qual.dat.l$Score<- factor(qual.dat.l$Score, levels = c("Low", "Moderate", "High", "Very.High"))
-  qual.dat.l$Score.Numeric<- as.numeric(qual.dat.l$Score)
-  
-  # Calculate weighted mean by species-attribute-attribute.category, then characterize these into low, moderate, high and very high. This will allow us to count them and apply the logic rule used by Hare et al.
-  qual.dat.wt.mean<- qual.dat.l %>%
-    group_by(., Species, Attribute, Attribute.Category) %>%
-    dplyr::summarise("Weighted.Mean" = weighted.mean(Score.Numeric, Votes)) %>%
-    dplyr::mutate(., "Logic.Rule" = cut(Weighted.Mean, breaks = c(0, 2.5, 3.0, 3.5, 100), labels = c("Low", "Moderate", "High", "Very.High")))
-  
-  # Now need to get to overall vulnerability...
-  # Get the counts (number of votes in each species - attribute category - vulneraibity) to apply logic rule
-  dat.scores<- qual.dat.wt.mean %>%
-    group_by(., Species, Attribute.Category, Logic.Rule) %>%
-    dplyr::summarise("Number" = n()) %>%
-    data.frame(.)
-  
-  # Apply logic rule to translate number of votes to a low-moderatre-high-very high rank for each species - attribute category
-  spp.ranks.split<- dat.scores %>%
-    dplyr::mutate(Rank.Temp = as.numeric(ifelse(Logic.Rule == "Very.High" & Number >= 3, 4, 
-                                                ifelse(Logic.Rule == "High" | Logic.Rule == "Very.High" & Number >= 2, 3, 
-                                                       ifelse(Logic.Rule == "High" | Logic.Rule == "Very.High" | Logic.Rule == "Moderate" & Number >= 2, 2, 1))))) %>%
-    dplyr::group_by(., Species, Attribute.Category) %>%
-    dplyr::summarise(Rank = max(Rank.Temp)) 
-  
-  # Calculate one overall vulnerability rank for each species, which is exposure factor rank * sensitivity attribute rank (ranges 1-16)
-  spp.ranks.overall<- spp.ranks.split %>%
-    spread(., Attribute.Category, Rank) %>% 
-    dplyr::group_by(., Species) %>%
-    dplyr::summarise(Overall.Rank = Exposure.Factor*Sensitivity.Attribute) %>% 
-    dplyr::mutate(., "Overall.Rank.Code" = cut(Overall.Rank, breaks = c(0, 3, 6, 9, 16), labels = c("Low", "Moderate", "High", "Very.High")))
-  
-  # Directional effect
-  dir.eff.dat.l<- gather(dir.eff.dat, "Score", "Votes", Negative, Neutral, Positive)
-  dir.eff.dat.l<- arrange(dir.eff.dat.l, Species, Functional.Group, Score)
-  
-  # Convert directional effect to number
-  dir.eff.dat.l$Score.Numeric<- ifelse(dir.eff.dat.l$Score == "Negative", -1,
-                                       ifelse(dir.eff.dat.l$Score == "Neutral", 0, 1))
-  
-  # Calculate weighted mean by species, then characterize these into negative. neutral, positive. 
-  dir.eff.dat.wt.mean<- dir.eff.dat.l %>%
-    group_by(., Species) %>%
-    dplyr::summarise("Weighted.Mean" = weighted.mean(Score.Numeric, Votes)) %>%
-    dplyr::mutate(., "Directional.Effect" = cut(Weighted.Mean, breaks = c(-100, -0.333, 0.333, 100), labels = c("Negative", "Neutral", "Positive")))
-  
-  # Okay...now what? Let's add in the response columns, which is the SDM and NEVA rank to each of the qual.dat.wt.mean and dir.eff.dat.wt.mean dataframes
-  qual.dat.wt.mean$Attribute.Full<- paste(qual.dat.wt.mean$Attribute.Category, "_", qual.dat.wt.mean$Attribute, sep = "")
-  qual.dat.mv<- qual.dat.wt.mean %>%
-    ungroup() %>%
-    dplyr::select(., -Weighted.Mean, -Attribute, -Attribute.Category) %>%
-    spread(., Attribute.Full, Logic.Rule) 
-  qual.dat.mv$COMNAME<- toupper(as.character(qual.dat.mv$Species))
-  
-  # Overall vulnerability....
-  dat.vuln.mv<- dat.vuln.comp %>%
-    dplyr::select(., COMNAME, Match)
-  
-  dat.vuln.mv$Match.Factor<- ifelse(dat.vuln.mv$Match == "Low_Low" | dat.vuln.mv$Match == "Moderate_Moderate"| dat.vuln.mv$Match == "High_High" | dat.vuln.mv$Match == "Very high_Very high", "Match",
-                                    ifelse(dat.vuln.mv$Match == "Moderate_Low" | dat.vuln.mv$Match == "High_Moderate" | dat.vuln.mv$Match == "Very high_High", "Miss One NEVA", 
-                                           ifelse(dat.vuln.mv$Match == "Low_Moderate" |  dat.vuln.mv$Match == "Moderate_High" |  dat.vuln.mv$Match == "High_Very high", "Miss One SDM",
-                                                  ifelse(dat.vuln.mv$Match == "High_Low" | dat.vuln.mv$Match == "Very high_Moderate", "Miss Two NEVA",
-                                                         ifelse(dat.vuln.mv$Match == "Low_High" | dat.vuln.mv$Match == "Moderate_Very high", "Miss Two SDM",
-                                                                ifelse(dat.vuln.mv$Match == "Very high_Low", "Miss Three NEVA",
-                                                                       ifelse(dat.vuln.mv$Match == "Low_Very high", "Miss Three SDM", NA)))))))
-  
-  dat.vuln.mv$Match.Factor<- factor(dat.vuln.mv$Match.Factor, levels = c("Match", "Miss One NEVA", "Miss One SDM", "Miss Two NEVA", "Miss Two SDM", "Miss Three NEVA", "Miss Three SDM"))
-  dat.vuln.mv$Match.Group<- ifelse(grepl("NEVA", dat.vuln.mv$Match.Factor), "NEVA",
-                                   ifelse(grepl("SDM", dat.vuln.mv$Match.Factor), "SDM", "None"))
-  dat.vuln.mv$Match.Group<- factor(dat.vuln.mv$Match.Group, levels = c("None", "SDM", "NEVA"))
-  dat.vuln.mv$Match.LevelOnly<- str_replace_all(dat.vuln.mv$Match.Factor, c(" NEVA" = "", " SDM" = ""))
-  dat.vuln.mv$Match.LevelOnly<- factor(dat.vuln.mv$Match.LevelOnly, levels = c("Match", "Miss One", "Miss Two", "Miss Three"))
-  
-  # Add in attributes...
-  dat.vuln.mod<- dat.vuln.mv %>%
-    left_join(., qual.dat.mv, by = "COMNAME") %>%
-    drop_na(Match.Factor, Match.LevelOnly)
-  
-  dat.vuln.mod<- data.frame(dat.vuln.mod[,c(7, 8:11, 25:36)])
-  
-  # Can't have any 0 obs for response classes...
-  summary(dat.vuln.mod)
-  dat.vuln.mod<- droplevels(dat.vuln.mod)
-  
-  dat.mod.full<- data.frame(dat.vuln.mod[,c(5:17)])
-  
-  rf.f<- randomForest(Match.LevelOnly ~ ., data = dat.mod.full, importance = TRUE)
-  rf.f
-  varImpPlot(rf.f)
-  
-  # Not great, reduce down to just matching vs. mismatching
-  dat.vuln.mod$Match.LevelRed<- ifelse(grepl("Miss", dat.vuln.mod$Match.LevelOnly) & grepl("SDM", dat.vuln.mod$Match.Group), "Miss SDM", 
-                                       ifelse(grepl("Miss", dat.vuln.mod$Match.LevelOnly) & grepl("NEVA", dat.vuln.mod$Match.Group), "Miss NEVA", "Match"))
-  dat.vuln.mod$Match.LevelRed<- factor(dat.vuln.mod$Match.LevelRed, levels = c("Match", "Miss SDM", "Miss NEVA"))
-  
-  dat.mod.LevelRed<- dat.vuln.mod[,c(18, 6:17)]
-  rf.f.red<- randomForest(Match.LevelRed ~ ., data = dat.mod.LevelRed, importance = TRUE)
-  rf.f.red
-  varImpPlot(rf.f.red)
-  
-  # Also horrible...just match vs. mismatch?
-  dat.vuln.mod$Match.Bin<- ifelse(grepl("Miss", dat.vuln.mod$Match.Factor), "Miss", "Match")
-  dat.vuln.mod$Match.Bin<- factor(dat.vuln.mod$Match.Bin, levels = c("Miss", "Match"))
-  dat.mod.bin<- data.frame(dat.vuln.mod[,c(19, 6:17)])
-  rf.f.bin<- randomForest(Match.Bin ~ ., data = dat.mod.bin, importance = TRUE)
-  rf.f.bin
-  varImpPlot(rf.f.bin)
-  
-  # Partial variable importance
-  adult.mob<- partialPlot(rf.f.bin, dat.mod.bin, Sensitivity.Attribute_Adult.Mobility, "Miss")
-  spawn.cycle<- partialPlot(rf.f.bin, dat.mod.bin, Sensitivity.Attribute_Spawning.Cycle, "Miss")
-  stock.size<- partialPlot(rf.f.bin, dat.mod.bin, Sensitivity.Attribute_Stock.Size.Status, "Miss")
-  
-  part.df<- data.frame("Category" = c(rep("Adult.Mobility", 4), rep("Spawn.Cycle", 3), rep("Stock.Size", 4)), "Rank" = c(adult.mob[[1]], spawn.cycle[[1]], stock.size[[1]]), "Probability" = c(adult.mob[[2]], spawn.cycle[[2]], stock.size[[2]]))
-  part.df<- part.df %>%
-    complete(., Category, Rank)
-  part.df$Rank<- factor(part.df$Rank, levels = c("Low", "Moderate", "High", "Very.High"))
-  part.df$Probability<- ifelse(part.df$Probability > 1, 1, part.df$Probability)
-  
-  part.plot<- ggplot() +
-    geom_bar(data = part.df, aes(x = Rank, y = Probability, fill = Category), stat = "identity", position = "dodge") +
-    scale_fill_manual(name = "Trait/Factor", values = c('#e41a1c','#377eb8','#4daf4a')) +
-    ylab("Marginal probability of being classified as a 'Miss'") +
-    xlab("NEVA Sensitivity")
-  ggsave(paste(out.dir, "RFPartImpPlot.jpg", sep = ""), part.plot, width = 11, height = 8)
-  
-  
-  
-  
-  # Nicer plot...
-  var.imp<- data.frame(rf.f.bin$importance)
-  var.imp<- data.frame("Attribute" = gsub("Sensitivity.Attribute_", "", rownames(var.imp)), "Mean Decrease Accuracy" = var.imp$MeanDecreaseAccuracy, "Mean Decrease Gini" = var.imp$MeanDecreaseGini)
-  var.imp.l<- var.imp %>%
-    gather(., "Metric", "Value", -Attribute)
-  var.imp.sd<- data.frame(rf.f.bin$importanceSD)
-  var.imp.sd<- data.frame("Attribute" = gsub("Sensitivity.Attribute_", "", rownames(var.imp.sd)), "SD Accuracy" = var.imp.sd$MeanDecreaseAccuracy)
-  
-  var.imp.acc<- var.imp.l %>%
-    filter(., Metric == "Mean.Decrease.Accuracy") %>%
-    left_join(., var.imp.sd) %>%
-    dplyr::arrange(Value)
-  
-  var.imp.acc$Attribute<- factor(var.imp.acc$Attribute, levels = var.imp.acc$Attribute)
-  
-  plot.imp.sd<- ggplot(var.imp.acc, aes(x = Value, y = Attribute)) + 
-    geom_point() +
-    geom_errorbarh(aes(y = Attribute, xmin=Value-SD.Accuracy, xmax=Value+SD.Accuracy), width=.2) 
-  
-  var.imp.gini<- var.imp.l %>%
-    group_by(., Metric) %>%
-    mutate_if(., is.numeric, scale)
-  
-  var.imp.scaled<- var.imp.gini %>%
-    filter(., Metric == "Mean.Decrease.Accuracy") %>%
-    dplyr::arrange(Value)
-  var.imp.scaled$Attribute<- factor(var.imp.scaled$Attribute, levels = var.imp.scaled$Attribute)
-  
-  plot.imp.scaled<- ggplot(var.imp.scaled, aes(Value, Attribute)) +
-    geom_segment(aes(x = 0, y = Attribute, xend = Value, yend = Attribute), color = "grey50") +
-    geom_point() +
-    geom_vline(xintercept = 0) +
-    xlab("Scaled mean decrease in accuracy")
-  
-  var.gini.scaled<- var.imp.gini %>%
-    filter(., Metric == "Mean.Decrease.Gini") %>%
-    dplyr::arrange(Value)
-  var.gini.scaled$Attribute<- factor(var.gini.scaled$Attribute, levels = var.gini.scaled$Attribute)
-  
-  plot.gini.scaled<- ggplot(var.gini.scaled, aes(Value, Attribute)) +
-    geom_segment(aes(x = 0, y = Attribute, xend = Value, yend = Attribute), color = "grey50") +
-    geom_point() +
-    geom_vline(xintercept = 0) +
-    xlab("Scaled mean decrease in Gini index")
-  
-  rf.f.bin.out<- plot_grid(plot.imp.scaled, plot.gini.scaled, nrow = 1)
-  ggsave(paste(out.dir, "RFVarImp_Sensitivity.jpg", sep = ""), rf.f.bin.out, width = 18, height = 8)
-  
-  plot.imp.scaled.vuln<- plot.imp.scaled
-}
 ## Random forest for sensitivity
 dat.sens.mv<- dat.sens.comp %>%
   ungroup() %>%
@@ -3023,7 +3506,7 @@ part.df$Probability<- ifelse(part.df$Probability > 1, 1, part.df$Probability)
 
 part.plot<- ggplot() +
   geom_bar(data = part.df, aes(x = Rank, y = Probability, fill = Category), stat = "identity", position = "dodge") +
-  scale_fill_manual(name = "Trait/Factor", values = c('#e41a1c','#377eb8')) +
+  scale_fill_manual(name = "Trait/Factor", values = c('#66a61e','#e6ab02')) +
   ylab("Marginal probability of being classified as a 'Miss'") +
   xlab("NEVA Sensitivity")
 ggsave(paste(out.dir, "RFPartImpPlot.jpg", sep = ""), part.plot, width = 11, height = 8)
@@ -3031,6 +3514,7 @@ ggsave(paste(out.dir, "RFPartImpPlot.jpg", sep = ""), part.plot, width = 11, hei
 
 ## Random forest for directional effect...
 dat.dir.mv<- dat.dir.comp %>%
+  ungroup() %>%
   dplyr::select(., COMNAME, Match)
 
 dat.dir.mv$Match.Factor<- ifelse(dat.dir.mv$Match == "Negative_Negative" | dat.dir.mv$Match == "Neutral_Neutral"| dat.dir.mv$Match == "Positive_Positivie", "Match",
@@ -3050,13 +3534,13 @@ dat.dir.mod<- dat.dir.mv %>%
   left_join(., qual.dat.mv, by = "COMNAME") %>%
   drop_na(Match.Factor, Match.LevelOnly)
 
-dat.dir.mod<- data.frame(dat.dir.mod[,c(2, 4:6, 20:31)])
+dat.dir.mod<- data.frame(dat.dir.mod[,c(5, 19:30)])
 
 # Can't have any 0 obs for response classes...
 summary(dat.dir.mod)
 dat.dir.mod<- droplevels(dat.dir.mod)
 
-dat.mod.full<- data.frame(dat.dir.mod[,c(4:16)])
+dat.mod.full<- data.frame(dat.dir.mod[,c(1, 2:13)])
 
 rf.f<- randomForest(Match.LevelOnly ~ ., data = dat.mod.full, importance = TRUE)
 rf.f
@@ -3066,10 +3550,29 @@ varImpPlot(rf.f)
 dat.dir.mod$Match.LevelRed<- ifelse(grepl("Miss", dat.dir.mod$Match.LevelOnly), "Miss", "Match") 
 dat.dir.mod$Match.LevelRed<- factor(dat.dir.mod$Match.LevelRed, levels = c("Match", "Miss"))
 
-dat.mod.LevelRed<- data.frame(dat.dir.mod[,c(32, 20:31)])
+dat.mod.LevelRed<- data.frame(dat.dir.mod[,c(14, 2:13)])
 rf.f.red<- randomForest(Match.LevelRed ~ ., data = dat.mod.LevelRed, importance = TRUE)
 rf.f.red
 varImpPlot(rf.f.red)
+
+# Partial variable importance
+other.stress<- partialPlot(rf.f.red, dat.mod.LevelRed, Sensitivity.Attribute_Other.Stressors, "Miss")
+stock.size<- partialPlot(rf.f.red, dat.mod.LevelRed, Sensitivity.Attribute_Stock.Size.Status, "Miss")
+pop.gr<- partialPlot(rf.f.red, dat.mod.LevelRed, Sensitivity.Attribute_Population.Growth.Rate, "Miss")
+complex<- partialPlot(rf.f.red, dat.mod.LevelRed, Sensitivity.Attribute_Complexity.in.Reproductive.Strategy, "Miss")
+
+part.df<- data.frame("Category" = c(rep("Other.Stressors", 4), rep("Stock.Size.Status", 4), rep("Population.Growth.Rate", 4), rep("Complexity.In.Reproductive.Strategy", 4)), "Rank" = rep(c("Low", "Moderate", "High", "Very.High"), 4), "Probability" = c(c(other.stress[[2]], 0), stock.size[[2]], pop.gr[[2]], c(complex[[2]], 0)))
+part.df<- part.df %>%
+  complete(., Category, Rank)
+part.df$Rank<- factor(part.df$Rank, levels = c("Low", "Moderate", "High", "Very.High"))
+part.df$Probability<- ifelse(part.df$Probability > 1, 1, part.df$Probability)
+
+part.plot<- ggplot() +
+  geom_bar(data = part.df, aes(x = Rank, y = Probability, fill = Category), stat = "identity", position = "dodge") +
+  scale_fill_manual(name = "Trait/Factor", values = c('#1b9e77','#d95f02','#7570b3','#e7298a')) +
+  ylab("Marginal probability of being classified as a 'Miss'") +
+  xlab("NEVA Sensitivity")
+ggsave(paste(out.dir, "RFPartImpPlotNew.jpg", sep = ""), part.plot, width = 11, height = 8)
 
 ## Random forest searching.....
 # Establish a list of possible values for mtry, nodesize and sampsize
@@ -4576,8 +5079,11 @@ sst.plot<- sst.plot %>%
 sst.plot$Region<- factor(sst.plot$Region, levels = c("NES LME", "GoM", "Southern NES LME"), labels = c("Northeast Shelf Large Marine Ecosystem", "Gulf of Maine", "Southern New England/Mid Atlantic Bight"))
 sst.plot$Season<- factor(sst.plot$Season, levels = c("FALL", "SPRING"), labels = c("Fall", "Spring"))
 
+sst.plot<- sst.plot %>%
+  dplyr::filter(., Year <= 2055)
+
 clim.sst.plot<- ggplot() + 
-  geom_vline(xintercept = 2050, size = 2) +
+  #geom_vline(xintercept = 2050, size = 2) +
   geom_line(data = sst.plot, aes(x = Year, y = Anomaly.Mean, color = Region)) +
   geom_ribbon(data = sst.plot, aes(x = Year, ymin = Anomaly.5th, ymax = Anomaly.95th, fill = Region), alpha=0.15) +
   scale_color_manual(name = "Region", values = c("black", '#377eb8', '#4daf4a')) +

@@ -3,24 +3,8 @@
 #####
 
 # Helper Function ---------------------------------------------------------
-library_check<- function(libraries) {
-  ## Details
-  # This function will check for and then either load or install any libraries needed to run subsequent functions
-  
-  # Args:
-  # libraries = Vector of required library names
-  
-  # Returns: NA, just downloads/loads libraries into current work space.
-  
-  ## Start function
-  lapply(libraries, FUN = function(x) {
-    if (!require(x, character.only = TRUE)) {
-      install.packages(x, dependencies = TRUE)
-      library(x, character.only = TRUE)
-    }
-  })
-  ## End function
-}
+source("https://raw.githubusercontent.com/GMRI-SEL/LabFunctionsandCode/master/GenerateSharedPathsScript.R")
+source(paste(lab.func.path, "GeneralHelpers.R", sep = ""))
 
 trawl_dat_prep<- function(survdat.file = "~/Volumes/Shared/Research/MillsLab/NMFS Trawl Data/Survdat_Nye_allseason.RData", sst = "~/Volumes/Shared/Research/MillsLab/SST/RawData/OISST.grd", out.path = "./Data/") {
   ## Details
@@ -36,11 +20,11 @@ trawl_dat_prep<- function(survdat.file = "~/Volumes/Shared/Research/MillsLab/NMF
   ## Start function
   # Preliminaries -----------------------------------------------------------
   # Load libraries, using package_check to download if it is missing
-  libraries.needed<- c("tidyverse", "sp", "raster", "geosphere")
+  libraries.needed<- c("tidyverse", "sp", "raster", "geosphere", "here")
   library_check(libraries.needed)
   
   # Load in the data
-  load(paste("./Data/", survdat.file, sep = ""))
+  load(paste(lab.data.path, "Survdat_Nye_allseason.RData", sep = ""))
   
   # Data cleaning -----------------------------------------------------------
   # Remove tows from Canadian waters and SEFSC 
