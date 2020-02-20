@@ -4484,11 +4484,11 @@ plot.out<- ggplot() +
   geom_sf(data = gom, aes(fill = "#377eb8"), color = NA, alpha = 0.75, show.legend = TRUE) +
   geom_sf(data = south, aes(fill = "#4daf4a"), color = NA, alpha = 0.75, show.legend = TRUE) +
   geom_sf(data = bstrat, fill = NA, color = "black", show.legend = FALSE) + 
-  scale_fill_manual(name = "Region", values = c("#377eb8", "#4daf4a"), labels = c("Gulf of Maine", "Southern New England/Mid Atlantic Bight")) +
+  scale_fill_manual(name = "Region", values = c("#377eb8", "#ff7f00"), labels = c("Gulf of Maine", "Southern New England/Mid Atlantic Bight")) +
   xlim(xlim.use) +
   ylim(ylim.use) +
   theme(panel.background = element_rect(fill = "white", color = "black"), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), strip.background = element_rect(fill="white", color = "black"))
-ggsave("~/GitHub/COCA/Results/StudyArea.jpg", plot.out, width = 8, height = 11)
+ggsave("~/GitHub/COCA/Results/StudyArea.jpg", plot.out, width = 8, height = 11, dpi = 400)
 
 us.large<- gSimplify(us, tol=0.1, topologyPreserve=TRUE)
 us.large<- st_as_sf(us.large)
@@ -4502,7 +4502,7 @@ plot.large<- ggplot() +
   xlim(c(-100, 0)) +
   ylim(c(25, 55)) +
   coord_sf(datum = NA) 
-ggsave("~/Desktop/NormalVoting_BiomassIncPresNoExposure_09222018/StudyAreaOverview.jpg", plot.large, width = 11, height = 8)
+ggsave("~/GitHub/COCA/Results/StudyAreaLarge.jpg", plot.large, width = 11, height = 8)
 
 
 # Manuscript Figures — Combined approach figure ---------------------------
